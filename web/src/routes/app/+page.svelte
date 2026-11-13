@@ -20,15 +20,23 @@
 	let openError = $state('');
 	let opening = $state(false);
 
+	/* Guards the one automatic read, so an empty vault does not make the
+	   effect fire over and over. */
+	let readOnce = $state(false);
+
 	onMount(async () => {
 		load();
 		await restore();
-		if (vault.status === 'unlocked') await refresh();
 	});
 
 	$effect(() => {
-		if (vault.status === 'unlocked' && envelopes.length === 0 && !loading && !chainError) {
+		if (vault.status === 'unlocked' && !readOnce) {
+			readOnce = true;
 			refresh();
+		} else if (vault.status !== 'unlocked' && readOnce) {
+			readOnce = false;
+			envelopes = [];
+			records = new Map();
 		}
 	});
 

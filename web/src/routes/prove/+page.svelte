@@ -23,14 +23,20 @@
 	let error = $state('');
 	let made = $state(null);
 
-	onMount(async () => {
-		load();
-		if (vault.status === 'unlocked') await read();
-		else loading = false;
-	});
+	/* Guards the one automatic read; see the same note on the envelopes page. */
+	let readOnce = $state(false);
+
+	onMount(load);
 
 	$effect(() => {
-		if (vault.status === 'unlocked' && loading && envelopes.length === 0 && !chainError) read();
+		if (vault.status === 'unlocked' && !readOnce) {
+			readOnce = true;
+			read();
+		} else if (vault.status !== 'unlocked' && readOnce) {
+			readOnce = false;
+		} else if (vault.status !== 'unlocked' && vault.ready) {
+			loading = false;
+		}
 	});
 
 	async function read() {

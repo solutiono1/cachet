@@ -36,8 +36,15 @@
 		if (wallet.accountId) await refreshWallet();
 	});
 
+	/* Read the payer's balance once per connected account, not on every
+	   change that a failed read would cause. */
+	let checkedFor = $state(null);
+
 	$effect(() => {
-		if (wallet.accountId && invoice && balance === null) refreshWallet();
+		if (wallet.accountId && invoice && checkedFor !== wallet.accountId) {
+			checkedFor = wallet.accountId;
+			refreshWallet();
+		}
 	});
 
 	async function refreshRecord() {
