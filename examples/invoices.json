@@ -1,0 +1,14 @@
+[
+  {
+    "index": 0,
+    "details": {
+      "v": 1,
+      "payee": "Demo Earner",
+      "client": "Northwind Studio",
+      "description": "Brand identity, phase one",
+      "amount": "250000000",
+      "token": "usdc.fakes.testnet",
+      "issued": "2026-11-13"
+    }
+  }
+]

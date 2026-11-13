@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" href="%sveltekit.assets%/seal.svg" />
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f4f0" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0c0c0c" />
+		<script>
+			// Apply the stored theme before first paint so the page never flashes.
+			try {
+				var t = localStorage.getItem('cachet.theme');
+				if (t === 'paper' || t === 'ink') document.documentElement.setAttribute('data-theme', t);
+			} catch (e) {}
+		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

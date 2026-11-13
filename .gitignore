@@ -1,0 +1,35 @@
+# Private working documents: never committed
+/internal/
+
+# Secrets and keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+neardev/
+.near-credentials/
+**/credentials/
+*.cachet-backup
+
+# Dependencies and build output
+node_modules/
+target/
+.svelte-kit/
+build/
+dist/
+*.wasm
+
+# Tooling and OS noise
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+coverage/
+test-results/
+
+# Contract build output
+/contract/out/
+/contract/target/
