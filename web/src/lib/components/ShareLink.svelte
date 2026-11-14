@@ -87,7 +87,9 @@
 		<Qr {value} label="The link as a QR code" />
 		<p class="caption">
 			Point a phone camera at this to open the same link. The code is drawn in this
-			browser, so the {carries} still goes nowhere near a server.
+			browser rather than by a code service, so the {carries} goes nowhere near a
+			server. It does carry everything the link carries, so treat a picture of it the
+			way you would treat the link.
 		</p>
 	</div>
 {/if}

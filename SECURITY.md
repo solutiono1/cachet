@@ -65,6 +65,9 @@ remaining weakness in the design.
 - Losing the browser data and the backup file loses access to unopened
   envelopes. There is no recovery service.
 - A pay link reveals that one invoice's details to anyone who obtains the link.
+  The QR code on the create screen is that same link in another shape, so a
+  photograph or screenshot of it discloses exactly as much. It is encoded in
+  the browser and never sent to a code service.
 - The contract cannot be upgraded. A flaw requires deploying a new contract.
 
 ## Handling of secrets in this repository
