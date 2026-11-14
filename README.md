@@ -48,7 +48,7 @@ This needs no wallet, no account and no testnet tokens. It proves the central
 claim of the project against the live chain.
 
 ```bash
-git clone https://github.com/solutionnau/cachet
+git clone https://github.com/solutiono1/cachet
 cd cachet/web
 npm install
 

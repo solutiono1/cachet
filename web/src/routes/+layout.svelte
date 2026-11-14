@@ -78,7 +78,7 @@
 	/* Fill the two empty strings in when the accounts exist. An entry with no
 	   href is not rendered, so the row never carries a dead icon. */
 	const social = [
-		{ name: 'GitHub', href: 'https://github.com/solutionnau/cachet' },
+		{ name: 'GitHub', href: 'https://github.com/solutiono1/cachet' },
 		{ name: 'X', href: '' },
 		{ name: 'YouTube', href: '' }
 	].filter((item) => item.href);
