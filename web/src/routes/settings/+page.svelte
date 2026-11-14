@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Lock from '#lib/components/Lock.svelte';
 	import { backupText, forget, load, lock, restore, vault } from '#lib/vault.svelte.js';
+	import Faucet from '#lib/components/Faucet.svelte';
 	import { CONTRACT_ID, NETWORK, TOKEN, explorerAccount } from '#lib/config.js';
 
 	let message = $state('');
@@ -54,11 +55,12 @@
 	}
 </script>
 
-<svelte:head><title>Settings — Cachet</title></svelte:head>
+<svelte:head><title>Settings on Cachet</title></svelte:head>
 
 <div class="container page">
 	<header class="head">
-		<h1>Settings</h1>
+		<p class="eyebrow">This device</p>
+			<h1>Settings</h1>
 		<p class="lede">Your vault, and where this copy of Cachet points.</p>
 	</header>
 
@@ -94,11 +96,11 @@
 			This replaces whatever is in this browser with the contents of the file.
 		</p>
 		<form class="stack" onsubmit={doRestore}>
-			<label class="field">
+			<label class="field-row">
 				<span class="label">Backup file</span>
 				<input type="file" accept="application/json,.json" onchange={pickFile} />
 			</label>
-			<label class="field">
+			<label class="field-row">
 				<span class="label">The passphrase it was saved with</span>
 				<input type="password" bind:value={restorePassphrase} autocomplete="current-password" />
 			</label>
@@ -106,6 +108,15 @@
 				Restore
 			</button>
 		</form>
+	</section>
+
+	<section class="card stack">
+		<h3>Test money</h3>
+		<p class="muted">
+			This deployment runs on a testnet token that anyone may mint, so you can fund
+			yourself here instead of hunting for a faucet. It has no value.
+		</p>
+		<Faucet />
 	</section>
 
 	<section class="card stack">

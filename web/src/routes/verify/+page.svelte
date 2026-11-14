@@ -61,7 +61,7 @@
 </script>
 
 <svelte:head>
-	<title>Check a proof — Cachet</title>
+	<title>Check a proof on Cachet</title>
 	<meta
 		name="description"
 		content="Check a Cachet proof of income against the NEAR chain. No wallet and no account needed."
@@ -179,6 +179,7 @@
 		<button class="btn btn--secondary" type="button" onclick={reset}>Check another proof</button>
 	{:else}
 		<header class="head">
+			<p class="eyebrow">Verification</p>
 			<h1>Check a proof</h1>
 			<p class="lede">
 				Paste a Cachet proof link or open the file. The checking happens in this browser,
@@ -188,7 +189,7 @@
 		</header>
 
 		<form class="card stack" onsubmit={fromPaste}>
-			<label class="field">
+			<label class="field-row">
 				<span class="label">Proof link or file contents</span>
 				<textarea
 					class="mono"

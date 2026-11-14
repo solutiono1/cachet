@@ -44,7 +44,7 @@
 	</p>
 
 	<form onsubmit={submit} class="stack">
-		<label class="field">
+		<label class="field-row">
 			<span class="label">Passphrase</span>
 			<input
 				type="password"
@@ -56,7 +56,7 @@
 		</label>
 
 		{#if creating}
-			<label class="field">
+			<label class="field-row">
 				<span class="label">Passphrase again</span>
 				<input type="password" bind:value={confirm} autocomplete="new-password" required />
 			</label>

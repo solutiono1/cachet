@@ -1,7 +1,8 @@
 {
 	"extends": "$app/tsconfig",
 	"compilerOptions": {
-		"strict": true
+		"checkJs": false,
+		"strict": false
 	},
-	"include": ["src", "vite.config.ts"]
+	"include": ["src", "bin", "vite.config.js"]
 }

@@ -7,6 +7,7 @@
 	import { CONTRACT_ID, TOKEN, explorerAccount, explorerTx } from '#lib/config.js';
 	import { formatAmount, formatDate, formatTimestamp } from '#lib/format.js';
 	import { payEnvelope, registerWithToken, restore, signIn, wallet } from '#lib/wallet.svelte.js';
+	import Faucet from '#lib/components/Faucet.svelte';
 
 	let invoice = $state(null);
 	let problem = $state('');
@@ -89,7 +90,7 @@
 </script>
 
 <svelte:head>
-	<title>{invoice ? `Pay ${invoice.details.payee} — Cachet` : 'Pay — Cachet'}</title>
+	<title>{invoice ? `Pay ${invoice.details.payee} on Cachet` : 'Pay on Cachet'}</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
@@ -186,6 +187,7 @@
 								That wallet holds {formatAmount(balance)} {TOKEN.symbol}, which is less than
 								this invoice.
 							</p>
+							<Faucet compact onfunded={refreshWallet} />
 						{/if}
 
 						<button

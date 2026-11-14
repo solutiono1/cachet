@@ -1,147 +1,167 @@
 <script>
-	import Seal from '#lib/components/Seal.svelte';
+	import Reveal from '#lib/components/Reveal.svelte';
+	import SealedCopy from '#lib/components/SealedCopy.svelte';
+	import CardArt from '#lib/components/CardArt.svelte';
+	import StepIcon from '#lib/components/StepIcon.svelte';
+	import Mark from '#lib/components/Mark.svelte';
+	import { TOKEN } from '#lib/config.js';
 
 	const steps = [
 		{
 			n: '01',
+			icon: 'seal',
 			title: 'Seal',
-			body: `You fill in the invoice. Cachet derives a one-time key for it and writes
-				nothing to any server. The details travel inside the link itself, in the part
-				of a web address that browsers never send anywhere.`
+			body: `Fill in the invoice. Cachet derives a key for that one invoice in your
+				browser and writes nothing to any server. The details ride inside the link, in
+				the part of a web address that browsers never send anywhere.`
 		},
 		{
 			n: '02',
+			icon: 'pay',
 			title: 'Pay',
-			body: `Your client opens the link and pays in USDC. The money goes to the Cachet
-				contract under that one-time key, not to your account. Nothing on the page
-				points back to you.`
+			body: `Your client opens the link and pays in ${TOKEN.symbol}. The money lands in
+				the Cachet contract under that single key, not in your account. Nothing on the
+				page points back to you.`
 		},
 		{
 			n: '03',
+			icon: 'open',
 			title: 'Open',
-			body: `When you want the money, you sign with the envelope's own key and send it to
-				whichever account you like. Only that key can release it, and the signature
-				names the destination, so nobody can redirect it.`
+			body: `Sign with the envelope's own key and send the money wherever you like. The
+				destination sits inside the signature, so even the person who submits the
+				transaction cannot redirect it.`
 		},
 		{
 			n: '04',
+			icon: 'prove',
 			title: 'Prove',
-			body: `Choose the payments a landlord, a lender or an accountant should see. Cachet
-				turns them into a link anyone can check against the chain, with no wallet and
-				no account.`
+			body: `Pick the payments a landlord, a lender or an accountant should see. Cachet
+				turns them into a link they can check against the chain, with no wallet and no
+				account of their own.`
 		}
 	];
 
 	const checks = [
 		{
 			title: 'The invoice matches its seal',
-			body: `Recomputing the hash from the disclosed details and the salt gives exactly
-				the value stored on chain. Change one character and it stops matching.`
+			body: `The details are hashed again with the salt you disclosed, and must equal the
+				value stored on chain. One edited character breaks it.`
 		},
 		{
-			title: 'The payment really happened',
-			body: `The envelope exists in the contract with that amount, that token and that
-				settlement time. The verifier reads it from NEAR, not from the file.`
+			title: 'The payment really settled',
+			body: `The envelope is read from the contract: amount, token and the moment it
+				arrived, straight from NEAR rather than from your file.`
 		},
 		{
 			title: 'The earner signed it',
-			body: `Every disclosed payment carries a signature from its envelope key over the
-				statement naming who the proof is for and when it expires.`
-		},
-		{
-			title: 'Nothing else is exposed',
-			body: `Payments you did not select are absent from the file and cannot be derived
-				from it. There is no list to walk.`
+			body: `Each disclosed payment carries a signature from the key that owns it, over a
+				statement naming the reader and an expiry date.`
 		}
 	];
 
 	const visibility = [
 		{
 			who: 'The client paying you',
-			sees: 'Their own invoice, the contract address, one single-use key',
-			cannot: 'Your account, your balance, anyone else who pays you'
+			sees: 'Their own invoice, the contract address, one single use key',
+			hidden: 'Your account, your balance, everyone else who pays you'
 		},
 		{
 			who: 'Anyone reading the chain',
 			sees: 'That some envelope received an amount from some account',
-			cannot: 'Which envelopes belong to one person, and every invoice detail'
+			hidden: 'Which envelopes belong to one person, and every invoice detail'
 		},
 		{
 			who: 'Whoever you hand a proof to',
-			sees: 'Exactly the payments you selected, and nothing more',
-			cannot: 'Any payment you left out of the proof'
+			sees: 'Exactly the payments you selected, and when they settled',
+			hidden: 'Every payment you left out of that proof'
 		}
 	];
 </script>
 
 <svelte:head>
-	<title>Cachet — get paid privately, prove it when it counts</title>
+	<title>Cachet, get paid privately and prove it when it counts</title>
 	<meta
 		name="description"
 		content="Cachet gives every stablecoin invoice its own sealed envelope on NEAR. Clients pay without seeing your wallet or your other income, and you disclose only the payments you choose."
 	/>
 </svelte:head>
 
-<section class="hero grain">
-	<div class="container hero-inner">
-		<p class="label">Private stablecoin invoicing · NEAR</p>
-		<h1>Get paid privately.<br />Prove it when it counts.</h1>
-		<p class="lede">
-			Every invoice gets its own sealed envelope. Your client pays it without seeing
-			your wallet, your balance, or the other people who pay you. When a landlord or a
-			lender asks what you earn, you open only the payments you choose.
-		</p>
-		<div class="row cta">
-			<a class="btn btn--primary btn--block-sm" href="/new/">Create a pay link</a>
-			<a class="btn btn--secondary btn--block-sm" href="/verify/">Check a proof</a>
+<div class="frame">
+	<section class="hero-card settle">
+		<div class="wash" aria-hidden="true"></div>
+		<CardArt opacity={0.5} radius={280} />
+
+		<div class="hero-body">
+			<p class="eyebrow mono">Private stablecoin invoicing on NEAR</p>
+			<h1>Get paid privately.<br />Prove it when it counts.</h1>
+			<p class="lede">
+				Every invoice gets its own sealed envelope. Your client pays it without seeing
+				your wallet, your balance, or the other people who pay you. When a landlord or
+				a lender asks what you earn, you open only the payments you choose.
+			</p>
+			<div class="row cta">
+				<a class="btn btn--primary btn--block-sm" href="/new/">Create a pay link</a>
+				<a class="text-link" href="/verify/">
+					Check a proof
+					<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
+						<path
+							d="M3.5 8h9M8.75 4.25 12.5 8l-3.75 3.75"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+				</a>
+			</div>
+			<p class="caption note">
+				Live on NEAR testnet. No sign up, no account, and no Cachet server to send your
+				details to.
+			</p>
 		</div>
-		<p class="caption note">
-			Runs on NEAR testnet with test USDC. No sign-up, no account, no Cachet server.
-		</p>
+	</section>
+</div>
+
+<section class="copies-band">
+	<div class="container">
+		<Reveal>
+			<div class="lead-in lead-in--wide">
+				<h2>The same invoice, kept two ways</h2>
+				<p class="lede">
+					You keep the document. The chain keeps a hash, an amount and a timestamp.
+					Below is a payment that really settled, shown both ways.
+				</p>
+			</div>
+		</Reveal>
+		<Reveal delay={80}>
+			<SealedCopy />
+		</Reveal>
 	</div>
 </section>
 
 <section class="band">
 	<div class="container">
-		<h2>One address tells everyone everything</h2>
-		<div class="problems">
-			<div class="problem">
-				<h4>Your client sees your balance</h4>
-				<p class="muted">
-					The moment you send a wallet address, whoever pays it can look up everything
-					that address has ever received, and watch it from then on.
+		<Reveal>
+			<div class="lead-in">
+				<h2>One address tells them everything</h2>
+				<p class="lede">
+					Hand a client your wallet address and you hand them your books. Cachet splits
+					apart the two things an address wrongly fuses: taking money, and giving up
+					your history.
 				</p>
 			</div>
-			<div class="problem">
-				<h4>Your clients see each other</h4>
-				<p class="muted">
-					Rates you negotiated separately end up side by side in a public ledger, in an
-					order anyone can read, permanently.
-				</p>
-			</div>
-			<div class="problem">
-				<h4>You still cannot prove your income</h4>
-				<p class="muted">
-					An explorer link that exposes your whole financial life is not a document a
-					landlord, a lender or a tax office will accept.
-				</p>
-			</div>
-		</div>
-	</div>
-</section>
+		</Reveal>
 
-<section class="band">
-	<div class="container">
-		<h2>How Cachet works</h2>
 		<ol class="steps">
-			{#each steps as step (step.n)}
-				<li>
-					<span class="step-n mono">{step.n}</span>
-					<div>
-						<h4>{step.title}</h4>
+			{#each steps as step, i (step.n)}
+				<Reveal delay={i * 70}>
+					<li class="step">
+						<span class="step-icon"><StepIcon name={step.icon} /></span>
+						<span class="step-n mono">{step.n}</span>
+						<h3>{step.title}</h3>
 						<p class="muted">{step.body}</p>
-					</div>
-				</li>
+					</li>
+				</Reveal>
 			{/each}
 		</ol>
 	</div>
@@ -149,160 +169,358 @@
 
 <section class="band">
 	<div class="container">
-		<h2>What a proof actually proves</h2>
-		<p class="lede">
-			A Cachet proof is not a screenshot and not a promise. The person you send it to
-			runs four checks against the chain, in their own browser.
-		</p>
-		<div class="checks">
-			{#each checks as check, i (check.title)}
-				<div class="check">
-					<span class="check-n mono">{i + 1}</span>
-					<h4>{check.title}</h4>
-					<p class="muted">{check.body}</p>
+		<Reveal>
+			<div class="lead-in">
+				<h2>A proof that answers to the chain</h2>
+				<p class="lede">
+					Not a screenshot and not a promise. The person you send it to runs three
+					checks in their own browser, against NEAR, with nothing to install.
+				</p>
+			</div>
+		</Reveal>
+
+		<Reveal delay={80}>
+			<div class="glass proof">
+				<div class="proof-head">
+					<Mark size={38} />
+					<p class="label">Three checks, every time</p>
 				</div>
-			{/each}
-		</div>
-		<p class="aside">
-			The third check is the one that matters most. It is what stops the client who paid
-			you from presenting your invoice as their own income: they know every detail, but
-			they never hold the envelope key.
-		</p>
+
+				<ol class="checks">
+					{#each checks as check, i (check.title)}
+						<li>
+							<span class="check-n mono">{i + 1}</span>
+							<h4>{check.title}</h4>
+							<p class="muted">{check.body}</p>
+						</li>
+					{/each}
+				</ol>
+
+				<p class="aside">
+					The third check is the one that matters. A client who paid one of these
+					invoices knows every detail of it, and still cannot present it as their own
+					income, because they never held the envelope key.
+				</p>
+
+				<a class="btn btn--secondary" href="/verify/">Check a real proof</a>
+			</div>
+		</Reveal>
 	</div>
 </section>
 
 <section class="band">
 	<div class="container">
-		<h2>Who sees what</h2>
-		<div class="table" role="table" aria-label="What each party can and cannot see">
-			<div class="trow thead" role="row">
-				<span role="columnheader">Party</span>
-				<span role="columnheader">Can see</span>
-				<span role="columnheader">Cannot see</span>
+		<Reveal>
+			<div class="lead-in">
+				<h2>Who sees what</h2>
 			</div>
-			{#each visibility as row (row.who)}
-				<div class="trow" role="row">
-					<span role="cell" class="who">{row.who}</span>
-					<span role="cell" class="muted">{row.sees}</span>
-					<span role="cell" class="muted">{row.cannot}</span>
-				</div>
+		</Reveal>
+
+		<div class="matrix">
+			{#each visibility as row, i (row.who)}
+				<Reveal delay={i * 70}>
+					<article class="card matrix-row">
+						<h4>{row.who}</h4>
+						<div>
+							<p class="label">Can see</p>
+							<p class="muted">{row.sees}</p>
+						</div>
+						<div>
+							<p class="label">Cannot see</p>
+							<p class="muted">{row.hidden}</p>
+						</div>
+					</article>
+				</Reveal>
 			{/each}
 		</div>
 
-		<div class="panel limits">
-			<p class="label">Where the privacy stops</p>
-			<p class="muted">
-				Amounts, paying accounts and timing are public on NEAR. Opening two envelopes
-				into the same account links those two payments to each other. Cachet hides you
-				from the people who pay you; it is not a mixer. Settling through NEAR
-				Confidential Intents on mainnet, which also hides where the money lands, is on
-				the roadmap and is not part of this release.
-			</p>
-		</div>
+		<Reveal delay={140}>
+			<div class="panel limits">
+				<p class="label">Where the privacy stops</p>
+				<p class="muted">
+					Amounts, paying accounts and settlement times are public on NEAR. Opening two
+					envelopes into the same account links those two payments to each other.
+					Cachet hides you from the people who pay you. It is not a mixer, and it does
+					not pretend to be. Settling through NEAR Confidential Intents on mainnet,
+					which would hide where the money lands as well, is on the roadmap and is not
+					part of this release.
+				</p>
+			</div>
+		</Reveal>
 	</div>
 </section>
 
-<section class="band closing">
-	<div class="container closing-inner">
-		<Seal size={44} />
-		<h2>Send your next invoice sealed</h2>
-		<p class="lede center">
-			It takes one form and no account. Your details never leave your browser.
-		</p>
-		<a class="btn btn--primary" href="/new/">Create a pay link</a>
-	</div>
-</section>
+<div class="frame frame--tail">
+	<Reveal>
+		<section class="closing-card">
+			<div class="wash wash--deep" aria-hidden="true"></div>
+			<CardArt opacity={0.42} radius={240} />
+			<div class="closing-body">
+				<Mark size={46} />
+				<h2>Send your next invoice sealed</h2>
+				<p class="lede center">
+					One form, no account, and no server to send your invoice to.
+				</p>
+				<div class="row cta center-row">
+					<a class="btn btn--primary" href="/new/">Create a pay link</a>
+					<a class="btn btn--secondary" href="/verify/">Check a proof</a>
+				</div>
+			</div>
+		</section>
+	</Reveal>
+</div>
 
 <style>
-	.hero {
-		padding-block: var(--s-hero) var(--s-band);
-		border-bottom: var(--hair) solid var(--border);
+	/* The card sits inside the page, not against its edges. */
+	.frame {
+		width: min(var(--wide), 100%);
+		margin-inline: auto;
+		padding-inline: var(--s-4);
+		padding-top: var(--s-3);
 	}
 
-	.hero-inner {
+	.frame--tail {
+		padding-top: clamp(48px, 7vw, 96px);
+	}
+
+	@media (min-width: 640px) {
+		.frame {
+			padding-inline: 28px;
+			padding-top: var(--s-6);
+		}
+	}
+
+	.hero-card,
+	.closing-card {
+		position: relative;
+		isolation: isolate;
+		overflow: hidden;
+		border: var(--hair) solid var(--border);
+		border-radius: 28px;
+		background: var(--surface);
+		box-shadow: var(--shadow-lift);
+	}
+
+	.hero-card {
+		display: grid;
+		align-content: end;
+		min-height: min(640px, 78vh);
+		padding: clamp(28px, 5vw, 64px);
+	}
+
+	.wash {
+		position: absolute;
+		inset: -30%;
+		z-index: -1;
+		pointer-events: none;
+		filter: blur(54px);
+		background:
+			radial-gradient(54% 60% at 82% 12%, var(--f-g1) 0, transparent 68%),
+			radial-gradient(46% 52% at 98% 46%, var(--f-g2) 0, transparent 72%),
+			radial-gradient(52% 44% at 24% 96%, var(--f-g2) 0, transparent 70%),
+			radial-gradient(44% 50% at 14% 10%, var(--f-hi) 0, transparent 68%),
+			linear-gradient(142deg, var(--f-a) 0, var(--f-b) 58%, var(--f-c) 100%);
+		animation: drift 24s var(--ease-in-out) infinite alternate;
+	}
+
+	.wash--deep {
+		filter: blur(60px);
+		background:
+			radial-gradient(58% 64% at 14% 8%, var(--f-g1) 0, transparent 70%),
+			radial-gradient(50% 56% at 92% 88%, var(--f-g1) 0, transparent 72%),
+			radial-gradient(46% 50% at 70% 14%, var(--f-hi) 0, transparent 66%),
+			linear-gradient(200deg, var(--f-c) 0, var(--f-a) 54%, var(--f-b) 100%);
+	}
+
+	.hero-body {
+		position: relative;
+		z-index: 1;
 		display: grid;
 		gap: var(--s-5);
-		max-width: 920px;
-		margin-inline: auto;
+		max-width: 46ch;
 	}
 
-	.hero h1 {
-		margin-block: var(--s-1) 0;
+	.eyebrow {
+		font-size: 12px;
+		letter-spacing: 0.1em;
+		color: var(--accent-text);
+		margin: 0;
+	}
+
+	.hero-body h1 {
+		margin: 0;
 	}
 
 	.cta {
-		margin-top: var(--s-2);
-		gap: var(--s-3);
+		margin-top: var(--s-1);
+		gap: var(--s-5);
 	}
 
 	.note {
 		color: var(--faint);
+		max-width: 44ch;
 	}
 
-	h2 {
-		margin-bottom: var(--s-6);
-	}
-
-	.problems {
-		display: grid;
-		gap: var(--s-6);
-	}
-
-	.problem {
-		display: grid;
+	/* A text link with an arrow that steps forward on hover. */
+	.text-link {
+		display: inline-flex;
+		align-items: center;
 		gap: var(--s-2);
-		padding-top: var(--s-5);
-		border-top: 2px solid var(--wax);
+		color: var(--text);
+		font-size: 15px;
+		font-weight: 600;
+		text-decoration: none;
+		transition: color var(--fast) var(--ease);
 	}
 
+	.text-link svg {
+		transition: translate var(--fast) var(--ease);
+	}
+
+	.text-link:hover {
+		color: var(--accent-text);
+	}
+
+	.text-link:hover svg {
+		translate: 3px 0;
+	}
+
+	/* ---- The two copies ---- */
+
+	.copies-band {
+		padding-block: clamp(56px, 8vw, 104px) 0;
+	}
+
+	.lead-in--wide {
+		max-width: 52ch;
+	}
+
+	/* ---- Sections ---- */
+
+	.lead-in {
+		display: grid;
+		gap: var(--s-3);
+		max-width: 46ch;
+		margin-bottom: clamp(32px, 4vw, 48px);
+	}
+
+	/* Four cards on one grid, equal height, the way the reference lays its
+	   feature set out. */
 	.steps {
 		display: grid;
-		gap: 0;
+		gap: var(--s-4);
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
-	.steps li {
+	.steps :global(.reveal) {
+		height: 100%;
+	}
+
+	.step {
+		position: relative;
 		display: grid;
-		grid-template-columns: 48px 1fr;
-		gap: var(--s-4);
-		padding-block: var(--s-6);
-		border-top: var(--hair) solid var(--border);
+		align-content: start;
+		gap: var(--s-2);
+		height: 100%;
+		padding: clamp(20px, 2.6vw, 28px);
+		background: color-mix(in srgb, var(--surface) 72%, transparent);
+		border: var(--hair) solid var(--border-soft);
+		border-radius: var(--r-card);
+		transition:
+			transform 280ms var(--ease),
+			border-color 280ms var(--ease),
+			background-color 280ms var(--ease),
+			box-shadow 280ms var(--ease);
 	}
 
-	.steps li:last-child {
-		border-bottom: var(--hair) solid var(--border);
+	.step:hover {
+		transform: translateY(-3px);
+		background: var(--surface);
+		border-color: color-mix(in srgb, var(--text) 16%, var(--border));
+		box-shadow: var(--shadow-card);
 	}
 
-	.steps h4 {
-		margin-bottom: var(--s-2);
+	.step-icon {
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		margin-bottom: clamp(24px, 4vw, 44px);
+		border-radius: var(--r-sm);
+		background: color-mix(in srgb, var(--wax) 12%, transparent);
+		color: var(--wax);
+		transition: background-color 280ms var(--ease);
+	}
+
+	.step:hover .step-icon {
+		background: color-mix(in srgb, var(--wax) 20%, transparent);
 	}
 
 	.step-n {
-		font-size: 13px;
-		color: var(--wax);
-		padding-top: 4px;
+		position: absolute;
+		top: clamp(20px, 2.6vw, 28px);
+		right: clamp(20px, 2.6vw, 28px);
+		font-size: 12px;
+		color: var(--faint);
+	}
+
+	.step h3 {
+		font-size: 1.3125rem;
+	}
+
+	.step p {
+		font-size: 14.5px;
+		line-height: 1.6;
+	}
+
+	@media (min-width: 680px) {
+		.steps {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (min-width: 1040px) {
+		.steps {
+			grid-template-columns: repeat(4, 1fr);
+			gap: var(--s-5);
+		}
+	}
+
+	/* ---- Proof ---- */
+
+	.proof {
+		display: grid;
+		gap: var(--s-6);
+		justify-items: start;
+		padding: clamp(24px, 4vw, 40px);
+	}
+
+	.proof-head {
+		display: flex;
+		align-items: center;
+		gap: var(--s-3);
 	}
 
 	.checks {
 		display: grid;
-		gap: var(--s-5);
+		gap: var(--s-6);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		width: 100%;
 	}
 
-	.check {
+	.checks li {
 		display: grid;
 		gap: var(--s-2);
-		padding: var(--s-5);
-		background: var(--surface);
-		border: var(--hair) solid var(--border);
-		border-radius: var(--r-card);
+		max-width: 62ch;
 	}
 
 	.check-n {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
+		display: grid;
+		place-items: center;
 		width: 26px;
 		height: 26px;
 		border-radius: var(--r-full);
@@ -312,44 +530,39 @@
 	}
 
 	.aside {
-		max-width: var(--prose);
-		margin-top: var(--s-6);
+		max-width: 64ch;
 		padding-left: var(--s-5);
 		border-left: 2px solid var(--wax);
 		color: var(--muted);
 	}
 
-	.table {
-		border: var(--hair) solid var(--border);
-		border-radius: var(--r-card);
-		background: var(--surface);
-		overflow: hidden;
+	@media (min-width: 880px) {
+		.checks {
+			grid-template-columns: repeat(3, 1fr);
+			gap: var(--s-7);
+		}
 	}
 
-	.trow {
+	/* ---- Matrix ---- */
+
+	.matrix {
 		display: grid;
-		gap: var(--s-2);
-		padding: var(--s-5);
-		border-top: var(--hair) solid var(--border);
-		font-size: 15px;
+		gap: var(--s-4);
 	}
 
-	.trow:first-child {
-		border-top: 0;
+	.matrix-row {
+		display: grid;
+		gap: var(--s-4);
+		transition:
+			transform 260ms var(--ease),
+			border-color 260ms var(--ease),
+			box-shadow 260ms var(--ease);
 	}
 
-	.thead {
-		display: none;
-		background: var(--raised);
-		font-size: 11px;
-		font-weight: 600;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--faint);
-	}
-
-	.who {
-		font-weight: 700;
+	.matrix-row:hover {
+		transform: translateY(-3px);
+		border-color: color-mix(in srgb, var(--text) 20%, var(--border));
+		box-shadow: var(--shadow-lift);
 	}
 
 	.limits {
@@ -359,39 +572,39 @@
 		max-width: var(--prose);
 	}
 
-	.closing {
+	@media (min-width: 880px) {
+		.matrix-row {
+			grid-template-columns: 1fr 1.3fr 1.3fr;
+			gap: var(--s-7);
+			align-items: start;
+		}
+	}
+
+	/* ---- Closing ---- */
+
+	.closing-card {
+		display: grid;
+		place-items: center;
+		min-height: min(440px, 62vh);
+		padding: clamp(40px, 7vw, 88px) clamp(24px, 5vw, 64px);
 		text-align: center;
 	}
 
-	.closing-inner {
+	.closing-body {
+		position: relative;
+		z-index: 1;
 		display: grid;
 		justify-items: center;
 		gap: var(--s-4);
-		padding-block: var(--s-section);
+		max-width: 44ch;
 	}
 
 	.center {
 		margin-inline: auto;
 	}
 
-	@media (min-width: 768px) {
-		.problems {
-			grid-template-columns: repeat(3, 1fr);
-			gap: var(--s-8);
-		}
-
-		.checks {
-			grid-template-columns: repeat(2, 1fr);
-		}
-
-		.trow {
-			grid-template-columns: 1fr 1.4fr 1.4fr;
-			gap: var(--s-6);
-			align-items: start;
-		}
-
-		.thead {
-			display: grid;
-		}
+	.center-row {
+		justify-content: center;
+		gap: var(--s-3);
 	}
 </style>

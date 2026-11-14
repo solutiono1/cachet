@@ -98,13 +98,14 @@
 	);
 </script>
 
-<svelte:head><title>Envelopes — Cachet</title></svelte:head>
+<svelte:head><title>Envelopes on Cachet</title></svelte:head>
 
 <div class="container page">
 	{#if !vault.ready}
 		<p class="muted">Opening this browser's vault…</p>
 	{:else if vault.status !== 'unlocked'}
 		<header class="head">
+			<p class="eyebrow">Your envelopes</p>
 			<h1>Your envelopes</h1>
 			<p class="lede">They live in this browser, encrypted.</p>
 		</header>
@@ -186,7 +187,7 @@
 										The signature names the destination, so nobody can redirect it. The
 										account must already be registered with {TOKEN.id}.
 									</p>
-									<label class="field">
+									<label class="field-row">
 										<span class="label">Send to</span>
 										<input class="mono" bind:value={recipient} placeholder="you.testnet" />
 									</label>

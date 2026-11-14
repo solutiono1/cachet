@@ -102,13 +102,14 @@
 	}
 </script>
 
-<svelte:head><title>Build a proof — Cachet</title></svelte:head>
+<svelte:head><title>Build a proof on Cachet</title></svelte:head>
 
 <div class="container page">
 	{#if !vault.ready}
 		<p class="muted">Opening this browser's vault…</p>
 	{:else if vault.status !== 'unlocked'}
 		<header class="head">
+			<p class="eyebrow">Disclosure</p>
 			<h1>Build a proof</h1>
 			<p class="lede">Unlock the vault that holds your invoices.</p>
 		</header>
@@ -205,15 +206,15 @@
 
 				<section class="card stack">
 					<p class="label">Who it is for</p>
-					<label class="field">
+					<label class="field-row">
 						<span class="label">Name of the person or company</span>
 						<input bind:value={audience} required maxlength="80" placeholder="Harbour Lettings" />
 					</label>
-					<label class="field">
+					<label class="field-row">
 						<span class="label">What they need it for</span>
 						<input bind:value={purpose} required maxlength="140" placeholder="Rental application" />
 					</label>
-					<label class="field">
+					<label class="field-row">
 						<span class="label">Stops being valid</span>
 						<input type="date" bind:value={expires} required />
 					</label>

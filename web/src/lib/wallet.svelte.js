@@ -123,6 +123,49 @@ export async function openEnvelope({ claimHex, sealHex, recipientId, signatureHe
 	});
 }
 
+/**
+ * The faucet.
+ *
+ * `usdc.fakes.testnet` lets any account mint to any account, verified against
+ * the live contract, so getting test money needs no Cachet server, no relayer
+ * and no faucet contract of our own. It is one transaction the person signs
+ * themselves: register with the token if needed, then mint.
+ *
+ * This exists only because the token is a testnet fake. On mainnet there is
+ * nothing to mint and this code does not apply.
+ */
+export const FAUCET_AMOUNT = '500000000'; // 500 USDC, six decimals
+
+export async function claimTestTokens(accountId, { needsRegistration }) {
+	const actions = [];
+
+	if (needsRegistration) {
+		actions.push({
+			type: 'FunctionCall',
+			params: {
+				methodName: 'storage_deposit',
+				args: { account_id: accountId, registration_only: true },
+				gas: '30000000000000',
+				deposit: '1250000000000000000000'
+			}
+		});
+	}
+
+	actions.push({
+		type: 'FunctionCall',
+		params: {
+			methodName: 'mint',
+			args: { account_id: accountId, amount: FAUCET_AMOUNT },
+			gas: '30000000000000',
+			deposit: '0'
+		}
+	});
+
+	/* Both calls go to the token in one signed transaction, so the person
+	   approves once rather than twice. */
+	return send({ receiverId: TOKEN.id, actions });
+}
+
 /** Register an account with the token so it can receive. */
 export async function registerWithToken(accountId) {
 	return send({

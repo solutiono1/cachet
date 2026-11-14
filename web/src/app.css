@@ -1,112 +1,152 @@
-/* Cachet design system. Tokens and base styles.
-   Spec: internal/DESIGN.md. Paper (light) and Ink (dark) themes. */
+/* Cachet design system.
+ *
+ * Built against three studied references: gloam.trade, keryxhq.xyz and
+ * hankolabs.xyz. Dark by default, as all three are. Depth comes from a
+ * blurred colour field behind the hero and from panel-on-canvas blocking,
+ * not from shadow stacks. One accent: sealing wax red. Green means verified
+ * and nothing else.
+ */
 
 @import '@fontsource-variable/fraunces/opsz.css';
 @import '@fontsource-variable/plus-jakarta-sans/index.css';
 @import '@fontsource-variable/jetbrains-mono/index.css';
 
 :root {
-	/* Type */
 	--font-display: 'Fraunces Variable', Fraunces, Georgia, serif;
 	--font-sans: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
 
-	/* Space (4px base) */
 	--s-1: 4px;
 	--s-2: 8px;
 	--s-3: 12px;
 	--s-4: 16px;
 	--s-5: 20px;
 	--s-6: 24px;
+	--s-7: 28px;
 	--s-8: 32px;
 	--s-section: 40px;
 	--s-band: 56px;
 	--s-hero: 112px;
 
-	/* Shape */
-	--r-card: 2px;
-	--r-control: 8px;
-	--r-panel: 14px;
+	/* Radii follow the references: generous on panels, pills on controls. */
+	--r-sm: 10px;
+	--r-card: 18px;
+	--r-panel: 20px;
 	--r-full: 9999px;
 	--hair: 1px;
 
-	/* Measure */
-	--container: 1152px;
+	--container: 1240px;
+	--wide: 1400px;
 	--form: 520px;
-	--prose: 68ch;
+	--prose: 66ch;
 
-	/* Motion */
-	--ease: cubic-bezier(0.2, 0, 0, 1);
-	--fast: 160ms;
+	/* Gloam's easing. Everything moves on this curve. */
+	--ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+	--fast: 200ms;
+	--mid: 420ms;
 
-	/* Wax is the one accent. It does not change between themes. */
 	--wax: #c8402f;
 	--wax-deep: #a8321f;
 	--wax-light: #e0604f;
 
-	color-scheme: light dark;
+	color-scheme: dark light;
 }
 
-/* Paper, the default theme */
+/* Ink: the default */
 :root,
-:root[data-theme='paper'] {
-	--bg: #f5f4f0;
-	--surface: #ffffff;
-	--raised: #f1efe8;
-	--text: #14140f;
-	--muted: #55534a;
-	--faint: #8b887c;
-	--border: #e5e2d8;
-	--accent-text: #a8321f;
-	--verified: #2c774f;
-	--verified-fill: rgba(44, 119, 79, 0.1);
-	--verified-line: rgba(44, 119, 79, 0.28);
-	--caution: #8a5d0f;
-	--caution-fill: rgba(138, 93, 15, 0.1);
-	--caution-line: rgba(138, 93, 15, 0.28);
-	--grain: rgba(20, 20, 15, 0.07);
-	--seal-shadow: rgba(122, 23, 18, 0.26);
-}
-
-/* Ink */
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme='paper']) {
-		--bg: #0c0c0c;
-		--surface: #121213;
-		--raised: #1f1f1f;
-		--text: #f2f2f2;
-		--muted: #9d9d9f;
-		--faint: #67676a;
-		--border: #2a2a2a;
-		--accent-text: #e0604f;
-		--verified: #8fd3ad;
-		--verified-fill: rgba(143, 211, 173, 0.12);
-		--verified-line: rgba(143, 211, 173, 0.3);
-		--caution: #d9a441;
-		--caution-fill: rgba(217, 164, 65, 0.12);
-		--caution-line: rgba(217, 164, 65, 0.3);
-		--grain: rgba(242, 242, 242, 0.06);
-		--seal-shadow: rgba(0, 0, 0, 0.5);
-	}
-}
-
 :root[data-theme='ink'] {
-	--bg: #0c0c0c;
-	--surface: #121213;
-	--raised: #1f1f1f;
-	--text: #f2f2f2;
-	--muted: #9d9d9f;
-	--faint: #67676a;
-	--border: #2a2a2a;
+	--bg: #0b0c0e;
+	--surface: #121316;
+	--raised: #1a1c20;
+	--text: #f4f5f6;
+	--muted: #9d9ea2;
+	--faint: #6b6d72;
+	--border: #232529;
+	--border-soft: #1b1d21;
 	--accent-text: #e0604f;
 	--verified: #8fd3ad;
 	--verified-fill: rgba(143, 211, 173, 0.12);
-	--verified-line: rgba(143, 211, 173, 0.3);
+	--verified-line: rgba(143, 211, 173, 0.28);
 	--caution: #d9a441;
 	--caution-fill: rgba(217, 164, 65, 0.12);
-	--caution-line: rgba(217, 164, 65, 0.3);
-	--grain: rgba(242, 242, 242, 0.06);
-	--seal-shadow: rgba(0, 0, 0, 0.5);
+	--caution-line: rgba(217, 164, 65, 0.28);
+
+	--glass: color-mix(in srgb, var(--surface) 86%, transparent);
+	--glass-line: color-mix(in srgb, var(--text) 10%, transparent);
+	--shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset, 0 14px 34px -20px rgba(0, 0, 0, 0.9);
+	--shadow-lift: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 28px 70px -28px rgba(0, 0, 0, 0.95);
+
+	/* The hero field, layered the way Gloam layers it. */
+	--f-g1: #2a1a16;
+	--f-g2: #1a2420;
+	--f-mid: #0c0d0f;
+	--f-hi: #24272b;
+	--f-a: #121316;
+	--f-b: #0d0e10;
+	--f-c: #1a1315;
+}
+
+:root[data-theme='paper'] {
+	--bg: #f5f4f0;
+	--surface: #ffffff;
+	--raised: #efede6;
+	--text: #14140f;
+	--muted: #55534a;
+	--faint: #8b887c;
+	--border: #e3e0d6;
+	--border-soft: #eeebe3;
+	--accent-text: #a8321f;
+	--verified: #2c774f;
+	--verified-fill: rgba(44, 119, 79, 0.1);
+	--verified-line: rgba(44, 119, 79, 0.26);
+	--caution: #8a5d0f;
+	--caution-fill: rgba(138, 93, 15, 0.1);
+	--caution-line: rgba(138, 93, 15, 0.26);
+
+	--glass: color-mix(in srgb, var(--surface) 88%, transparent);
+	--glass-line: color-mix(in srgb, var(--text) 8%, transparent);
+	--shadow-card: 0 1px 2px 0 rgba(20, 20, 15, 0.04), 0 10px 28px -18px rgba(20, 20, 15, 0.22);
+	--shadow-lift: 0 1px 2px 0 rgba(20, 20, 15, 0.05), 0 26px 60px -26px rgba(20, 20, 15, 0.3);
+
+	--f-g1: #f0ddd7;
+	--f-g2: #dfe9e2;
+	--f-mid: #e8e6e0;
+	--f-hi: #ffffff;
+	--f-a: #f3f2ee;
+	--f-b: #eceae4;
+	--f-c: #f2e4df;
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='ink']):not([data-theme='paper']) {
+		--bg: #f5f4f0;
+		--surface: #ffffff;
+		--raised: #efede6;
+		--text: #14140f;
+		--muted: #55534a;
+		--faint: #8b887c;
+		--border: #e3e0d6;
+		--border-soft: #eeebe3;
+		--accent-text: #a8321f;
+		--verified: #2c774f;
+		--verified-fill: rgba(44, 119, 79, 0.1);
+		--verified-line: rgba(44, 119, 79, 0.26);
+		--caution: #8a5d0f;
+		--caution-fill: rgba(138, 93, 15, 0.1);
+		--caution-line: rgba(138, 93, 15, 0.26);
+		--glass: color-mix(in srgb, var(--surface) 88%, transparent);
+		--glass-line: color-mix(in srgb, var(--text) 8%, transparent);
+		--shadow-card: 0 1px 2px 0 rgba(20, 20, 15, 0.04), 0 10px 28px -18px rgba(20, 20, 15, 0.22);
+		--shadow-lift: 0 1px 2px 0 rgba(20, 20, 15, 0.05), 0 26px 60px -26px rgba(20, 20, 15, 0.3);
+		--f-g1: #f0ddd7;
+		--f-g2: #dfe9e2;
+		--f-mid: #e8e6e0;
+		--f-hi: #ffffff;
+		--f-a: #f3f2ee;
+		--f-b: #eceae4;
+		--f-c: #f2e4df;
+	}
 }
 
 *,
@@ -117,6 +157,7 @@
 
 html {
 	-webkit-text-size-adjust: 100%;
+	scroll-behavior: smooth;
 }
 
 body {
@@ -130,40 +171,39 @@ body {
 	-webkit-font-smoothing: antialiased;
 }
 
-/* Headings use Fraunces with a high optical size and tight tracking */
 h1,
 h2,
 h3 {
 	font-family: var(--font-display);
 	font-weight: 500;
 	font-variation-settings: 'opsz' 48;
-	line-height: 1.06;
+	line-height: 1.05;
 	margin: 0;
 	text-wrap: balance;
 }
 
 h1 {
-	font-size: clamp(2.375rem, 1.6rem + 3.2vw, 3.8125rem);
-	letter-spacing: -0.025em;
+	font-size: clamp(2.375rem, 1.45rem + 3.9vw, 4.25rem);
+	letter-spacing: -0.028em;
 }
 
 h2 {
-	font-size: clamp(1.75rem, 1.3rem + 1.9vw, 2.75rem);
-	letter-spacing: -0.02em;
+	font-size: clamp(1.875rem, 1.3rem + 2.3vw, 3rem);
+	letter-spacing: -0.024em;
 }
 
 h3 {
 	font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
-	letter-spacing: -0.015em;
-	font-variation-settings: 'opsz' 20;
+	letter-spacing: -0.016em;
+	font-variation-settings: 'opsz' 22;
 }
 
 h4 {
 	font-family: var(--font-sans);
-	font-size: 1.125rem;
+	font-size: 1.0625rem;
 	font-weight: 700;
-	letter-spacing: -0.01em;
-	line-height: 1.5;
+	letter-spacing: -0.012em;
+	line-height: 1.45;
 	margin: 0;
 }
 
@@ -176,12 +216,13 @@ a {
 	color: var(--accent-text);
 	text-decoration-thickness: 1px;
 	text-underline-offset: 3px;
+	transition: color var(--fast) var(--ease);
 }
 
 :focus-visible {
 	outline: 2px solid var(--wax);
 	outline-offset: 2px;
-	border-radius: var(--r-control);
+	border-radius: var(--r-sm);
 }
 
 ::selection {
@@ -189,12 +230,22 @@ a {
 	color: #fff;
 }
 
-/* Type helpers */
+/* ---- Type helpers ---- */
 
 .lede {
-	font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+	font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+	line-height: 1.55;
 	color: var(--muted);
 	max-width: var(--prose);
+}
+
+/* The small wax line that sits above a page title. */
+.eyebrow {
+	font-family: var(--font-mono);
+	font-size: 12px;
+	letter-spacing: 0.1em;
+	color: var(--accent-text);
+	margin: 0;
 }
 
 .label {
@@ -207,8 +258,8 @@ a {
 }
 
 .caption {
-	font-size: 12px;
-	line-height: 1.5;
+	font-size: 12.5px;
+	line-height: 1.55;
 	color: var(--muted);
 	margin: 0;
 }
@@ -232,7 +283,7 @@ a {
 	color: var(--muted);
 }
 
-/* Layout */
+/* ---- Layout ---- */
 
 .container {
 	width: 100%;
@@ -241,15 +292,15 @@ a {
 	padding-inline: var(--s-4);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
 	.container {
 		padding-inline: 28px;
 	}
 }
 
 .band {
-	padding-block: var(--s-band);
-	border-top: var(--hair) solid var(--border);
+	padding-block: clamp(56px, 8vw, 104px);
+	border-top: var(--hair) solid var(--border-soft);
 }
 
 .stack {
@@ -265,12 +316,35 @@ a {
 	flex-wrap: wrap;
 }
 
-.grain {
-	background-image: radial-gradient(var(--grain) 1px, transparent 1.3px);
-	background-size: 24px 24px;
+/* The field: a soft, blurred colour wash behind a hero. Six radials over a
+   linear base, exactly the structure the references use, kept to one hue. */
+.field {
+	position: absolute;
+	inset: -12%;
+	z-index: -1;
+	pointer-events: none;
+	filter: blur(48px);
+	background:
+		radial-gradient(62% 72% at 86% 104%, var(--f-g1) 0, transparent 70%),
+		radial-gradient(48% 62% at 102% 42%, var(--f-g2) 0, transparent 72%),
+		radial-gradient(60% 40% at 40% 112%, var(--f-g2) 0, transparent 72%),
+		radial-gradient(46% 58% at 58% 78%, var(--f-mid) 0, transparent 70%),
+		radial-gradient(52% 62% at 18% 22%, var(--f-hi) 0, transparent 70%),
+		radial-gradient(38% 44% at 66% 26%, var(--f-hi) 0, transparent 70%),
+		linear-gradient(135deg, var(--f-a) 0, var(--f-b) 55%, var(--f-c) 100%);
+	animation: drift 22s var(--ease-in-out) infinite alternate;
 }
 
-/* Buttons */
+@keyframes drift {
+	from {
+		transform: translate(0, 0) scale(1);
+	}
+	to {
+		transform: translate(-2.5%, -1.5%) scale(1.06);
+	}
+}
+
+/* ---- Buttons ---- */
 
 .btn {
 	display: inline-flex;
@@ -284,14 +358,15 @@ a {
 	font-family: var(--font-sans);
 	font-size: 15px;
 	font-weight: 600;
-	letter-spacing: -0.005em;
+	letter-spacing: -0.007em;
 	line-height: 1;
 	text-decoration: none;
 	cursor: pointer;
 	transition:
 		transform var(--fast) var(--ease),
 		background-color var(--fast) var(--ease),
-		border-color var(--fast) var(--ease);
+		border-color var(--fast) var(--ease),
+		box-shadow var(--fast) var(--ease);
 }
 
 .btn--primary {
@@ -305,16 +380,18 @@ a {
 	border-color: var(--wax-deep);
 	color: #fff;
 	transform: translateY(-1px);
+	box-shadow: var(--shadow-card);
 }
 
 .btn--secondary {
-	background: transparent;
-	border-color: var(--border);
+	background: color-mix(in srgb, var(--text) 6%, transparent);
+	border-color: var(--glass-line);
 	color: var(--text);
 }
 
 .btn--secondary:hover {
-	background: var(--raised);
+	background: color-mix(in srgb, var(--text) 11%, transparent);
+	border-color: color-mix(in srgb, var(--text) 22%, transparent);
 	color: var(--text);
 	transform: translateY(-1px);
 }
@@ -322,7 +399,7 @@ a {
 .btn--quiet {
 	min-height: 34px;
 	padding: 0 var(--s-3);
-	border-radius: var(--r-control);
+	border-radius: var(--r-sm);
 	border-color: var(--border);
 	background: var(--raised);
 	color: var(--text);
@@ -331,11 +408,12 @@ a {
 
 .btn--quiet:hover {
 	background: var(--surface);
+	border-color: color-mix(in srgb, var(--text) 20%, transparent);
 	color: var(--text);
 }
 
 .btn:active {
-	transform: scale(0.985);
+	transform: scale(0.98);
 }
 
 .btn:disabled,
@@ -345,77 +423,94 @@ a {
 	transform: none;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 679px) {
 	.btn--block-sm {
 		width: 100%;
 	}
 }
 
-/* Surfaces */
+/* ---- Surfaces ---- */
 
 .card {
 	background: var(--surface);
 	border: var(--hair) solid var(--border);
 	border-radius: var(--r-card);
-	padding: var(--s-8);
+	box-shadow: var(--shadow-card);
+	padding: clamp(20px, 3vw, 28px);
 }
 
 .panel {
-	background: var(--raised);
-	border: var(--hair) solid var(--border);
+	background: color-mix(in srgb, var(--surface) 60%, transparent);
+	border: var(--hair) solid var(--border-soft);
 	border-radius: var(--r-panel);
 	padding: var(--s-5);
 }
 
-/* Forms */
+.glass {
+	background: var(--glass);
+	border: var(--hair) solid var(--glass-line);
+	border-radius: var(--r-panel);
+	backdrop-filter: blur(14px) saturate(1.1);
+	-webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
 
-.field {
+/* ---- Forms ---- */
+
+.field-row {
 	display: flex;
 	flex-direction: column;
 	gap: var(--s-2);
 }
 
-.field input,
-.field textarea,
-.field select {
+.field-row input,
+.field-row textarea,
+.field-row select {
 	width: 100%;
 	min-height: 48px;
 	padding: var(--s-3) var(--s-4);
-	background: var(--surface);
+	background: color-mix(in srgb, var(--bg) 60%, var(--surface));
 	border: var(--hair) solid var(--border);
-	border-radius: var(--r-control);
+	border-radius: var(--r-sm);
 	color: var(--text);
 	font-family: var(--font-sans);
 	font-size: 16px;
 	line-height: 1.4;
+	transition:
+		border-color var(--fast) var(--ease),
+		box-shadow var(--fast) var(--ease);
 }
 
-.field textarea {
+.field-row textarea {
 	resize: vertical;
 	min-height: 96px;
 }
 
-.field input.mono,
-.field textarea.mono {
+.field-row input.mono,
+.field-row textarea.mono {
 	font-family: var(--font-mono);
 	font-size: 14px;
 }
 
-.field input::placeholder,
-.field textarea::placeholder {
+.field-row input::placeholder,
+.field-row textarea::placeholder {
 	color: var(--faint);
 }
 
-.field input:focus-visible,
-.field textarea:focus-visible,
-.field select:focus-visible {
-	outline: 2px solid var(--wax);
-	outline-offset: 2px;
+.field-row input:hover,
+.field-row textarea:hover {
+	border-color: color-mix(in srgb, var(--text) 22%, transparent);
+}
+
+.field-row input:focus-visible,
+.field-row textarea:focus-visible,
+.field-row select:focus-visible {
+	outline: none;
 	border-color: var(--wax);
+	box-shadow: 0 0 0 4px color-mix(in srgb, var(--wax) 18%, transparent);
 }
 
 .hint {
-	font-size: 12px;
+	font-size: 12.5px;
 	color: var(--muted);
 }
 
@@ -423,7 +518,7 @@ a {
 	color: var(--accent-text);
 }
 
-/* Badge */
+/* ---- Badge ---- */
 
 .badge {
 	display: inline-flex;
@@ -454,11 +549,11 @@ a {
 	color: var(--caution);
 }
 
-/* Misc */
+/* ---- Misc ---- */
 
 hr {
 	border: 0;
-	border-top: var(--hair) solid var(--border);
+	border-top: var(--hair) solid var(--border-soft);
 	margin: var(--s-6) 0;
 }
 
@@ -473,7 +568,29 @@ hr {
 	white-space: nowrap;
 }
 
+/* A short settle, used on things that appear after load. */
+@keyframes settle {
+	from {
+		opacity: 0;
+		filter: blur(3px);
+		transform: translateY(3px);
+	}
+	to {
+		opacity: 1;
+		filter: none;
+		transform: none;
+	}
+}
+
+.settle {
+	animation: settle 240ms var(--ease) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
 	*,
 	*::before,
 	*::after {

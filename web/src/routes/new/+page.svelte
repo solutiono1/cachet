@@ -67,13 +67,14 @@
 	}
 </script>
 
-<svelte:head><title>Create a pay link — Cachet</title></svelte:head>
+<svelte:head><title>Create a pay link on Cachet</title></svelte:head>
 
 <div class="container page">
 	{#if !vault.ready}
 		<p class="muted">Opening this browser's vault…</p>
 	{:else if vault.status !== 'unlocked'}
 		<header class="head">
+			<p class="eyebrow">New envelope</p>
 			<h1>Create a pay link</h1>
 			<p class="lede">First, the secret that every invoice hangs on.</p>
 		</header>
@@ -126,17 +127,17 @@
 		</header>
 
 		<form class="card form" onsubmit={submit}>
-			<label class="field">
+			<label class="field-row">
 				<span class="label">Your name, as the client should see it</span>
 				<input bind:value={payee} required maxlength="80" placeholder="Solution Nau" />
 			</label>
 
-			<label class="field">
+			<label class="field-row">
 				<span class="label">Client</span>
 				<input bind:value={client} required maxlength="80" placeholder="Northwind Studio" />
 			</label>
 
-			<label class="field">
+			<label class="field-row">
 				<span class="label">What it is for</span>
 				<input
 					bind:value={description}
@@ -147,12 +148,12 @@
 			</label>
 
 			<div class="pair">
-				<label class="field">
+				<label class="field-row">
 					<span class="label">Amount in {TOKEN.symbol}</span>
 					<input class="mono" bind:value={amount} required inputmode="decimal" placeholder="250.00" />
 				</label>
 
-				<label class="field">
+				<label class="field-row">
 					<span class="label">Issued</span>
 					<input type="date" bind:value={issued} required />
 				</label>
