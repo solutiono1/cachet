@@ -49,7 +49,7 @@
 			const envelope = await addInvoice(details);
 			made = {
 				envelope,
-				fragment: encodePayload(payLinkPayload(envelope, CONTRACT_ID))
+				fragment: await encodePayload(payLinkPayload(envelope, CONTRACT_ID))
 			};
 		} catch (problem) {
 			error = problem.message;
@@ -129,18 +129,39 @@
 		<form class="card form" onsubmit={submit}>
 			<label class="field-row">
 				<span class="label">Your name, as the client should see it</span>
-				<input bind:value={payee} required maxlength="80" placeholder="Solution Nau" />
+				<input
+					bind:value={payee}
+					required
+					maxlength="80"
+					placeholder="Solution Nau"
+					name="cachet-payee"
+					autocomplete="off"
+					data-1p-ignore
+					data-lpignore="true"
+				/>
 			</label>
 
 			<label class="field-row">
 				<span class="label">Client</span>
-				<input bind:value={client} required maxlength="80" placeholder="Northwind Studio" />
+				<input
+					bind:value={client}
+					required
+					maxlength="80"
+					placeholder="Northwind Studio"
+					name="cachet-client"
+					autocomplete="off"
+					data-1p-ignore
+					data-lpignore="true"
+				/>
 			</label>
 
 			<label class="field-row">
 				<span class="label">What it is for</span>
 				<input
 					bind:value={description}
+					name="cachet-description"
+					autocomplete="off"
+					data-1p-ignore
 					required
 					maxlength="140"
 					placeholder="Brand identity, phase one"
@@ -150,7 +171,16 @@
 			<div class="pair">
 				<label class="field-row">
 					<span class="label">Amount in {TOKEN.symbol}</span>
-					<input class="mono" bind:value={amount} required inputmode="decimal" placeholder="250.00" />
+					<input
+						class="mono"
+						bind:value={amount}
+						required
+						inputmode="decimal"
+						placeholder="250.00"
+						name="cachet-amount"
+						autocomplete="off"
+						data-1p-ignore
+					/>
 				</label>
 
 				<label class="field-row">

@@ -125,7 +125,7 @@ switch (command) {
 						claim: toHex(envelope.publicKey),
 						seal: toHex(envelope.seal)
 					}),
-					pay_link_fragment: encodePayload(payload)
+					pay_link_fragment: await encodePayload(payload)
 				},
 				null,
 				2

@@ -129,24 +129,64 @@ export async function signDisclosure(envelope, contractId, hash) {
  * and nothing else.
  */
 
-export function encodePayload(object) {
-	return toB64(utf8(JSON.stringify(object)));
+/* The link has to carry the whole invoice, because there is no server to
+   fetch it from. So it is packed rather than pretty: one-letter keys, the
+   details as a positional array, and gzip where the browser offers it. A
+   leading 'z' marks a compressed payload. Together this roughly halves the
+   link against plain JSON. */
+
+const DETAIL_ORDER = ['payee', 'client', 'description', 'amount', 'token', 'issued'];
+
+async function gzip(bytes) {
+	if (typeof CompressionStream === 'undefined') return null;
+	const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+	return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
-export function decodePayload(text) {
-	const json = new TextDecoder().decode(fromB64(text.trim()));
-	return JSON.parse(json);
+async function gunzip(bytes) {
+	const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+	return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+export async function encodePayload(object) {
+	const raw = utf8(JSON.stringify(object));
+	try {
+		const packed = await gzip(raw);
+		/* Only worth it if it actually came out smaller. */
+		if (packed && packed.length < raw.length) return 'z' + toB64(packed);
+	} catch {
+		/* fall through to the plain form */
+	}
+	return toB64(raw);
+}
+
+export async function decodePayload(text) {
+	const trimmed = text.trim();
+	if (trimmed.startsWith('z')) {
+		const raw = await gunzip(fromB64(trimmed.slice(1)));
+		return JSON.parse(new TextDecoder().decode(raw));
+	}
+	return JSON.parse(new TextDecoder().decode(fromB64(trimmed)));
 }
 
 export function payLinkPayload(envelope, contractId) {
 	return {
 		v: VERSION,
-		t: 'pay',
-		contract: contractId,
-		claim: toB64(envelope.publicKey),
-		salt: toB64(envelope.salt),
-		details: envelope.details
+		t: 'p',
+		c: contractId,
+		k: toB64(envelope.publicKey),
+		s: toB64(envelope.salt),
+		d: DETAIL_ORDER.map((key) => envelope.details[key])
 	};
+}
+
+/** Expand the packed form back into the details the seal was taken over. */
+function unpackDetails(list) {
+	const details = { v: VERSION };
+	DETAIL_ORDER.forEach((key, i) => {
+		details[key] = list[i];
+	});
+	return details;
 }
 
 /**
@@ -155,17 +195,22 @@ export function payLinkPayload(envelope, contractId) {
  * given matches the invoice it displays.
  */
 export async function readPayLink(payload) {
-	if (payload?.t !== 'pay') throw new Error('This is not a Cachet pay link.');
-	if (payload.v !== VERSION) throw new Error('This pay link was made by a different version of Cachet.');
-	const claim = fromB64(payload.claim);
-	const salt = fromB64(payload.salt);
-	const seal = await sealOf(payload.details, salt);
+	if (payload?.t !== 'p') throw new Error('This is not a Cachet pay link.');
+	if (payload.v !== VERSION) {
+		throw new Error('This pay link was made by a different version of Cachet.');
+	}
+	const claim = fromB64(payload.k);
+	const salt = fromB64(payload.s);
+	const details = unpackDetails(payload.d);
+	/* Recomputed here, not trusted from the link: this is what lets the payer
+	   check that the invoice they are shown is the one that was sealed. */
+	const seal = await sealOf(details, salt);
 	const id = await envelopeIdOf(claim, seal);
 	return {
-		contractId: payload.contract,
+		contractId: payload.c,
 		claimPublicKey: claim,
 		salt,
-		details: payload.details,
+		details,
 		seal,
 		id,
 		idHex: toHex(id)

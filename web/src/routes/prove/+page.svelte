@@ -83,7 +83,7 @@
 				expires
 			};
 			const proof = await buildProof(selected, statement, CONTRACT_ID);
-			made = { proof, fragment: encodePayload(proof) };
+			made = { proof, fragment: await encodePayload(proof) };
 		} catch (problem) {
 			error = problem.message;
 		}

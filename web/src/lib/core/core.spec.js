@@ -105,8 +105,8 @@ describe('pay links', () => {
 	it('round-trips and reproduces the same envelope id without any secret', async () => {
 		const seed = randomBytes(32);
 		const envelope = await buildEnvelope(seed, 3, details);
-		const link = encodePayload(payLinkPayload(envelope, CONTRACT));
-		const read = await readPayLink(decodePayload(link));
+		const link = await encodePayload(payLinkPayload(envelope, CONTRACT));
+		const read = await readPayLink(await decodePayload(link));
 		expect(read.idHex).toBe(envelope.idHex);
 		expect(read.details.client).toBe('Northwind Studio');
 	});
@@ -114,17 +114,23 @@ describe('pay links', () => {
 	it('carries no secret key', async () => {
 		const seed = randomBytes(32);
 		const envelope = await buildEnvelope(seed, 3, details);
-		const link = encodePayload(payLinkPayload(envelope, CONTRACT));
-		const plain = new TextDecoder().decode(fromB64(link));
+		const link = await encodePayload(payLinkPayload(envelope, CONTRACT));
+		/* Decode it the way a reader would, then look through everything the
+		   link carries, however it was packed. */
+		const payload = await decodePayload(link);
+		const plain = JSON.stringify(payload);
 		expect(plain).not.toContain(toB64(envelope.secret));
 		expect(plain).not.toContain(toHex(envelope.secret));
+		expect(link).not.toContain(toB64(envelope.secret));
 	});
 
 	it('produces a different id if the details in the link are edited', async () => {
 		const seed = randomBytes(32);
 		const envelope = await buildEnvelope(seed, 3, details);
 		const payload = payLinkPayload(envelope, CONTRACT);
-		payload.details = { ...payload.details, amount: '9999999999' };
+		/* d is positional: payee, client, description, amount, token, issued. */
+		payload.d = [...payload.d];
+		payload.d[3] = '9999999999';
 		const read = await readPayLink(payload);
 		expect(read.idHex).not.toBe(envelope.idHex);
 	});

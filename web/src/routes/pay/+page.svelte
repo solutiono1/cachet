@@ -29,7 +29,7 @@
 			return;
 		}
 		try {
-			invoice = await readPayLink(decodePayload(fragment));
+			invoice = await readPayLink(await decodePayload(fragment));
 		} catch (error) {
 			problem = `This link could not be read. ${error.message}`;
 			return;

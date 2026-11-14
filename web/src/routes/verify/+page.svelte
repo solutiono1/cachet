@@ -22,7 +22,8 @@
 		checking = true;
 		result = null;
 		try {
-			const bundle = getBundle();
+			/* awaited, because decoding a packed link is asynchronous */
+			const bundle = await getBundle();
 			result = await verifyProof(bundle, fetchEnvelopes);
 		} catch (problem) {
 			error = `This is not a proof Cachet can read. ${problem.message}`;
