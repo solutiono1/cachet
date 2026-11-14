@@ -1,39 +1,53 @@
+<div align="center">
+
 # Cachet
 
 **Get paid privately. Prove it when it counts.**
 
-Cachet gives every stablecoin invoice its own sealed envelope on NEAR. A client
-pays the envelope without ever seeing the earner's wallet, their balance, or the
-other people who pay them. Later, when a landlord or a lender asks what the
-earner makes, the earner discloses only the payments they choose, as a proof
-anyone can check against the chain with no wallet and no account.
+Every stablecoin invoice gets its own sealed envelope on NEAR. Clients pay
+without seeing your wallet, your balance, or the other people who pay you.
+Later you disclose only the payments you choose, as a proof anyone can check
+against the chain with no wallet and no account.
 
-Built for the NEAR Hackathon, November 2026. Tracks: **Privacy & Private AI**,
-**Real-World Money**, **Open Innovation**.
+[Live contract](https://testnet.nearblocks.io/address/cachetapp.testnet) ·
+[Architecture](docs/ARCHITECTURE.md) ·
+[Security review](docs/AUDIT.md) ·
+[Threat model](SECURITY.md)
+
+Built for the NEAR Hackathon, November 2026
+Tracks: **Privacy and Private AI** · **Real-World Money** · **Open Innovation**
+
+</div>
 
 ---
 
 ## The problem
 
-A freelancer paid in USDC hands each client a wallet address. That address shows
-the client everything: the balance, every other client, every amount, for ever.
-And after all that exposure, the earner still has no document a landlord, a
-lender or a tax office will accept — only an explorer link that reveals their
-whole financial life.
+A freelancer paid in USDC gives each client a wallet address. That address is a
+public page. The client can look up every payment it has ever received: who
+else pays this person, how much, and how often.
 
-Cachet separates the two things an address wrongly fuses: **receiving money** and
-**revealing your history**.
+So the earner picks between two bad options. Use one address, and every client
+sees every other client's rate. Use a fresh address per client, and now they
+are managing keys by hand with no record of which is which.
+
+And after all that exposure they still cannot answer the question that
+actually matters: **prove you earn enough to rent this flat.** A block explorer
+link is not a document a landlord, a lender or a tax office accepts, and it
+reveals far more than was asked.
+
+Cachet separates the two things an address wrongly fuses: **taking money** and
+**surrendering your history**.
 
 ## Live on NEAR testnet
 
 | | |
 |---|---|
 | Contract | [`cachetapp.testnet`](https://testnet.nearblocks.io/address/cachetapp.testnet) |
-| Token | [`usdc.fakes.testnet`](https://testnet.nearblocks.io/address/usdc.fakes.testnet) (NEP-141 test USDC, 6 decimals) |
-| Network | NEAR testnet |
-| Deploy transaction | [`589yY7g2x2fLdiNgcq3xsoJuLQFRXJxSMSad5qQQ1sH`](https://testnet.nearblocks.io/txns/589yY7g2x2fLdiNgcq3xsoJuLQFRXJxSMSad5qQQ1sH) |
+| Token | [`usdc.fakes.testnet`](https://testnet.nearblocks.io/address/usdc.fakes.testnet) · NEP-141 test USDC, 6 decimals |
+| Deploy | [`589yY7g2x2fLdiNgcq3xsoJuLQFRXJxSMSad5qQQ1sH`](https://testnet.nearblocks.io/txns/589yY7g2x2fLdiNgcq3xsoJuLQFRXJxSMSad5qQQ1sH) |
 
-A real round trip already on chain, made by `scripts/demo-testnet.sh`:
+A full round trip already on chain, made by `scripts/demo-testnet.sh`:
 
 | Step | Transaction |
 |---|---|
@@ -42,17 +56,16 @@ A real round trip already on chain, made by `scripts/demo-testnet.sh`:
 
 ---
 
-## Check a real proof in two minutes
+## Verify a real proof in two minutes
 
-This needs no wallet, no account and no testnet tokens. It proves the central
-claim of the project against the live chain.
+No wallet, no account, no test tokens. This checks the central claim of the
+project against the live chain.
 
 ```bash
 git clone https://github.com/solutiono1/cachet
 cd cachet/web
 npm install
 
-# A proof over the payment that is already on chain, signed for a named reader.
 node bin/cachet.mjs proof \
   --seed 00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff \
   --invoices ../examples/invoices.json \
@@ -82,7 +95,6 @@ VERIFIED
 Now change one character and watch it fail honestly:
 
 ```bash
-# Edit the audience, which the signature covers.
 sed -i 's/Harbour Lettings/Someone Else/' proof.json
 node bin/cachet.mjs verify proof.json
 ```
@@ -93,16 +105,17 @@ NOT VERIFIED
          The signature does not come from the key that owns this payment.
 ```
 
-`verify` exits `0` when verified and `1` when not, so it can be used in a script.
+`verify` exits `0` when verified and `1` when not, so it can be used in a
+script.
 
-> The seed above is published on purpose, for this demo only. A real earner's
-> seed never leaves their browser.
+> The seed above is published deliberately, for this demo only. A real
+> earner's seed never leaves their browser.
 
 ---
 
-## Try the whole thing in a browser
+## Try the whole product in a browser
 
-Nothing to source and nothing to ask for.
+Nothing to source and nobody to ask.
 
 ```bash
 cd web
@@ -111,45 +124,52 @@ npm run dev     # http://localhost:5173
 ```
 
 1. **Get an account.** The wallet button opens MyNearWallet, which creates a
-   testnet account for free. No extension needed.
-2. **Get test money.** Settings has a faucet. The token on this deployment is
-   `usdc.fakes.testnet`, a testnet fake that lets any account mint, so the
-   button is one transaction you sign yourself: it registers you with the
-   token if needed and mints 500 USDC. Cachet holds no keys and runs no
-   service to make that work. On mainnet there is nothing to mint and the
-   button does not apply.
-3. **Create a pay link**, open it in another browser or a private window, and
-   pay it. That second browser never learns your account.
-4. **Open the envelope** to any account you like.
-5. **Build a proof** from the payment and check it on the verify page, which
-   needs no wallet at all.
+   testnet account free. No browser extension needed.
+2. **Get test money.** Settings has a faucet. `usdc.fakes.testnet` is a testnet
+   token that lets any account mint, so the button is one transaction you sign
+   yourself: it registers you with the token if needed and mints 500 USDC.
+   Cachet holds no keys and runs no service to make that work. On mainnet there
+   is nothing to mint and the button does not apply.
+3. **Create a pay link**, open it in a private window, and pay it. That second
+   browser never learns who the earner is.
+4. **Open the envelope** to any account you choose.
+5. **Build a proof** and check it on the verify page, which needs no wallet.
 
 ---
 
 ## How it works
 
-One invoice becomes one **envelope**.
+One invoice becomes one **envelope**. Two of the four steps never touch the
+chain.
 
 ```
 envelope key, salt  =  HKDF(seed, "cachet/v1/claim/<n>"), HKDF(seed, "cachet/v1/salt/<n>")
-seal                =  SHA-256(canonical invoice details || salt)
-envelope id         =  SHA-256(claim public key || seal)
+seal                =  SHA-256(canonical invoice details ‖ salt)
+envelope id         =  SHA-256(claim public key ‖ seal)
 ```
 
-1. **Seal.** The earner fills in an invoice. Keys and salt are derived in their
-   browser. Nothing is written anywhere, and no transaction is made. The invoice
-   travels inside the pay link, in the URL fragment, which browsers never send
-   to a server.
-2. **Pay.** The client calls `ft_transfer_call` on the token, which hands the
-   money to the Cachet contract along with the claim key and seal. The contract
-   files it under the envelope id. The chain learns a hash, an amount and a
-   payer — never who the earner is.
-3. **Open.** The earner signs `SHA-256("cachet/v1/withdraw" ‖ contract ‖
-   envelope id ‖ recipient)` with the envelope key. Anyone may submit that
-   transaction; only the key holder can produce the signature, and because the
-   recipient is inside the signed bytes, a submitter cannot redirect the money.
-4. **Prove.** The earner selects payments and signs a statement naming the
-   reader, the purpose and an expiry. Each payment carries its own signature.
+**1. Seal.** You fill in an invoice. The key and salt are derived in your
+browser. Nothing is written anywhere and no transaction is made. The invoice
+travels inside the pay link, in the fragment after `#`, which browsers never
+send to a server.
+
+**2. Pay.** Your client calls `ft_transfer_call` on the token, which hands the
+money to the contract with the claim key and the seal. The contract files it
+under the envelope id. The chain now holds a hash, an amount, a payer and a
+timestamp. It does not hold your name, your account, or what the work was.
+
+**3. Open.** You sign, with the envelope's own key:
+
+```
+SHA-256("cachet/v1/withdraw" ‖ contract ‖ envelope id ‖ recipient)
+```
+
+Anyone may submit that transaction, but only the key holder can produce the
+signature, and because the recipient sits inside the signed bytes, even the
+submitter cannot redirect the money.
+
+**4. Prove.** You select payments and sign a statement naming the reader, the
+purpose and an expiry. Each payment carries its own signature.
 
 ### What a verifier checks
 
@@ -160,38 +180,85 @@ envelope id         =  SHA-256(claim public key || seal)
 3. Check each payment's signature against the key that owns it, over the
    statement.
 
-Check 3 is the one that matters: **a client who paid an invoice knows every
-detail of it, but never holds the envelope key**, so they cannot present the
-earner's income as their own.
+**Check 3 is the product.** A client who paid an invoice knows every detail of
+it, and still cannot present it as their own income, because they never held
+the envelope key. There is a test for exactly that.
 
 ---
 
-## Run it yourself
+## Why NEAR
 
-### What you need
+The design depends on NEAR specifically, not incidentally.
 
-- Node 20 or newer (built and tested on Node 26.13.1)
-- For the contract: Rust 1.95 or newer with the `wasm32-unknown-unknown` target,
-  plus a C toolchain (`build-essential` on Debian or Ubuntu)
-- For testnet transactions: [`near` CLI](https://github.com/near/near-cli-rs)
+| NEAR feature | How Cachet uses it |
+|---|---|
+| `env::ed25519_verify` | The contract verifies the withdrawal signature **on chain**. This is what makes a one-time key per invoice possible at all |
+| `env::sha256` | Envelope ids computed on chain, identical to the browser |
+| NEP-141 `ft_transfer_call` | How a payment arrives, handled in `ft_on_transfer` |
+| Cross-contract calls and callbacks | Withdrawal marks `opened`, calls the token, and restores state in a `#[private]` callback if the transfer fails |
+| Named accounts | You open an envelope to a readable account, not a hex string |
+| Public RPC | The verifier reads envelopes with no key and no wallet |
+| NEAR Intents | Live cross-chain pricing on the pay screen, from the real 1Click API |
 
-### The web app
+On a chain without on-chain Ed25519 verification, every envelope would need
+its own account or a far more expensive scheme.
+
+## Architecture
+
+```
+Browser  (everything secret lives here)
+   seed → HKDF → one key and one salt per invoice
+   encrypted at rest with the person's passphrase
+         │
+         │  the invoice rides in the link fragment, never sent to a server
+         ▼
+NEAR contract  cachetapp.testnet
+   envelope id → { seal, token, amount, payer, time, opened }
+         │
+         ▼
+Anyone holding a proof → reads the contract over public RPC → verified
+```
+
+**No backend, no database, no accounts, no cookies, no analytics.** The whole
+application makes one outbound request, a view call to public RPC. That is the
+point rather than a shortcut: a privacy product with a server is asking you to
+trust the server.
+
+## Repository
+
+```
+contract/        Rust contract (near-sdk 5). No owner, no upgrade path, no pause
+  src/lib.rs     ft_on_transfer, withdraw, views, 11 unit tests
+web/
+  src/lib/core/  the cryptography: crypto.js, envelope.js, proof.js (+ tests)
+  src/lib/       chain reads, wallet, faucet, vault, NEAR Intents, formatting
+  src/routes/    landing, create, pay, envelopes, prove, verify, settings, privacy
+  bin/cachet.mjs command line: envelope, sign, proof, verify
+scripts/         the testnet round trip
+docs/            ARCHITECTURE.md, AUDIT.md
+examples/        a sample invoice list for the quick start
+```
+
+Seven screens. **Four need no wallet at all:** creating a pay link, reading
+your envelopes, building a proof, and checking a proof. Only paying and opening
+need a signature, and opening needs one only to pay the gas; the right to the
+money comes from the envelope key.
+
+## Running it
+
+**Requirements.** Node 20 or newer, built on 26.13.1. For the contract, Rust
+1.95 or newer with the `wasm32-unknown-unknown` target and a C toolchain. For
+testnet transactions, the [`near` CLI](https://github.com/near/near-cli-rs).
 
 ```bash
 cd web
 npm install
-npm run dev     # http://localhost:5173
-npm test        # 19 tests covering keys, seals, links and proofs
-npm run build   # static site in web/build
-```
+npm run dev      # http://localhost:5173
+npm test         # 50 tests on keys, seals, links, proofs and palette contrast
+npm run build    # static site in web/dist
 
-There is no server and no database. The app talks to NEAR RPC from the browser.
-
-### The contract
-
-```bash
-cd contract
-cargo test                                     # 11 unit tests
+cd ../contract
+cargo test                                      # 11 unit tests
 cargo near build non-reproducible-wasm --no-abi
 ```
 
@@ -206,92 +273,49 @@ near contract deploy YOUR.testnet use-file ./target/near/cachet.wasm \
 
 Then point `web/src/lib/config.js` at it.
 
-### The full round trip on testnet
-
-`scripts/demo-testnet.sh` seals an envelope, pays it, reads it back and opens
-it. It needs three testnet accounts whose keys are in your legacy keychain:
-
-```bash
-for a in cachetapp cachetpayer cachetpayout; do
-  near account create-account sponsor-by-faucet-service $a.testnet \
-    autogenerate-new-keypair save-to-legacy-keychain \
-    network-config testnet create
-done
-
-# Register each with the token, then mint yourself some test USDC.
-near contract call-function as-transaction usdc.fakes.testnet mint \
-  json-args '{"account_id":"cachetpayer.testnet","amount":"5000000000"}' \
-  prepaid-gas '30.0 Tgas' attached-deposit '0 NEAR' \
-  sign-as cachetpayer.testnet network-config testnet sign-with-legacy-keychain send
-
-./scripts/demo-testnet.sh
-```
-
----
-
-## What is in here
-
-```
-contract/        Rust contract (near-sdk 5), no owner, no upgrade path
-  src/lib.rs     ft_on_transfer, withdraw, views, and 11 unit tests
-web/
-  src/lib/core/  the cryptography: crypto.js, envelope.js, proof.js (+ tests)
-  src/lib/       chain reading, wallet, vault, config, formatting
-  src/routes/    landing, create, pay, envelopes, prove, verify, settings,
-                 privacy (what leaves the browser, audited from the source)
-  bin/cachet.mjs the command-line tool: envelope, sign, proof, verify
-scripts/         the testnet round trip
-docs/            ARCHITECTURE.md
-examples/        a sample invoice list for the quick start
-```
-
-Six screens; four of them need no wallet at all. Creating a pay link, reading
-your envelopes, building a proof and checking a proof are all wallet-free.
-Only paying an invoice and opening an envelope need a signature, and opening
-needs one only to pay the gas — the right to the money comes from the envelope
-key.
-
----
-
 ## Who sees what
 
 | Party | Can see | Cannot see |
 |---|---|---|
-| The client paying you | Their own invoice, the contract, one single-use key | Your account, your balance, anyone else who pays you |
+| The client paying you | Their own invoice, the contract, one single use key | Your account, your balance, everyone else who pays you |
 | Anyone reading the chain | That an envelope received an amount from an account | Which envelopes belong to one person, and every invoice detail |
-| Whoever you hand a proof to | Exactly the payments you selected | Any payment you left out |
-
-### What the application sends anywhere
-
-Audited from the source rather than asserted. The whole app contains **one**
-outbound request, in `web/src/lib/near.js`: a view call to a public NEAR RPC
-endpoint carrying an envelope identifier, which is a hash. Everything else is
-your wallet talking to NEAR when you sign.
-
-There are no cookies, no analytics, no error reporting and no advertising
-code. Fonts are served from the app's own origin. The seed and invoice records
-live in your browser's local storage, encrypted with your passphrase using
-PBKDF2 and AES-GCM. `/privacy` lists all of it.
+| Whoever you hand a proof to | Exactly the payments you selected | Every payment you left out |
 
 ### Where the privacy stops
 
-Said plainly, because a privacy claim that oversells itself is worse than none:
+Stated plainly, because a privacy claim that oversells itself is worse than
+none.
 
-- Amounts, paying accounts and settlement times are public on NEAR.
-- Opening two envelopes into the same account links those two payments.
-- Cachet hides the earner from the people who pay them. It is **not** a mixer.
-- Settling through NEAR Confidential Intents on mainnet, which would also hide
-  where the money lands, is on the roadmap and is **not** in this release.
+- Amounts, paying accounts and settlement times are **public** on NEAR.
+- Opening two envelopes into the same account **links** those two payments.
+- Cachet hides the earner from the people who pay them. It is **not a mixer**.
+- Settling through NEAR Confidential Intents on mainnet, which would hide where
+  the money lands as well, is on the roadmap and is **not** in this release.
 
-See [SECURITY.md](SECURITY.md) for the threat model and
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design.
+### What the application sends anywhere
 
----
+Audited from the source rather than asserted. One outbound request, in
+`web/src/lib/near.js`: a view call to public RPC carrying an envelope
+identifier, which is a hash. Everything else is your wallet talking to NEAR
+when you sign. No cookies, no analytics, no error reporting, no advertising.
+Fonts are served from the app's own origin. The seed and invoice records live
+in local storage, encrypted with your passphrase using PBKDF2 and AES-GCM.
+`/privacy` lists all of it.
+
+## Security
+
+[`docs/AUDIT.md`](docs/AUDIT.md) records a review of the code against its own
+claims, including two real defects found and fixed, and one limitation left
+open and documented. [`SECURITY.md`](SECURITY.md) holds the threat model.
+
+**This is testnet software and it has not been audited by a third party.** Do
+not use it with funds you cannot afford to lose.
 
 ## Roadmap
 
-1. Mainnet settlement through NEAR Confidential Intents, so the link between
-   deposit and withdrawal is hidden too; pay from any chain through 1Click.
+1. Mainnet settlement through NEAR Confidential Intents, hiding the link
+   between deposit and withdrawal. Cross-chain pricing is already live on the
+   pay screen; execution is the next step.
 2. Threshold proofs: "earned at least X a month over N months" without listing
    individual payments.
 3. Tax-ready statements and an accountant view.
@@ -300,24 +324,21 @@ See [SECURITY.md](SECURITY.md) for the threat model and
 
 ## Built with
 
-- [near-sdk](https://github.com/near/near-sdk-rs) 5.30 — contract
+- [near-sdk](https://github.com/near/near-sdk-rs) 5.30 for the contract
 - [SvelteKit](https://svelte.dev/docs/kit) 3 with `adapter-static`, plain
   JavaScript, no TypeScript
-- [@noble/curves](https://github.com/paulmillr/noble-curves) — Ed25519
-- [@scure/base](https://github.com/paulmillr/scure-base) — base58, base64url, hex
+- [@noble/curves](https://github.com/paulmillr/noble-curves) for Ed25519 and
+  [@scure/base](https://github.com/paulmillr/scure-base) for encodings
 - [@near-wallet-selector](https://github.com/near/wallet-selector) with
   MyNearWallet, so a payer needs no browser extension
 - Hashing, HKDF, PBKDF2 and AES-GCM come from the platform's own Web Crypto
-- Fonts, self-hosted and under the SIL Open Font License: Fraunces, Plus Jakarta
+- Fonts, self-hosted, under the SIL Open Font License: Fraunces, Plus Jakarta
   Sans, JetBrains Mono
 
-The project was scaffolded with `sv create` and `cargo near new`. The code was
-written with Claude Code (Claude, by Anthropic) working from the author's
-specification, and every line was reviewed before it was committed.
+Scaffolded with `sv create` and `cargo near new`. The code was written with
+Claude Code working from the author's specification, and reviewed before each
+commit.
 
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
-
-**Testnet software. It has not been audited. Do not use it with funds you cannot
-afford to lose.**
