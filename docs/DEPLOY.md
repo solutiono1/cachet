@@ -40,11 +40,18 @@ Git**, then pick `solutiono1/cachet`.
 | Build command | `cd web && npm install && npm run build` |
 | Build output directory | `web/dist` |
 | Root directory | `/` |
-| Node version | 20 or newer, set `NODE_VERSION` if the default is older |
+| Node version | taken from `.nvmrc` at the repository root, which says 22 |
 
 There are no environment variables and no build secrets. Everything the app
 needs, including which contract and which chain endpoints it reads, is in
 `web/src/lib/config.js` and is public by design.
+
+Vite 8 and SvelteKit 3 need Node 20.19 or 22.12 and above, so `.nvmrc` pins
+22 and `web/package.json` declares the same in `engines`. Cloudflare reads
+`.nvmrc` on its own; if it ever ignores it, set a `NODE_VERSION` variable to
+`22` on the project. The build has been run locally on Node 26, and nothing in
+it compiles native code, so any version at or above the floor should behave
+the same.
 
 Every push to `main` then redeploys, and every other branch gets its own
 preview URL.
