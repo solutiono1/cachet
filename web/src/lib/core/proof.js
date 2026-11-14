@@ -96,10 +96,27 @@ export async function verifyProof(bundle, fetchEnvelopes, now = Date.now()) {
 		chainError = error.message || String(error);
 	}
 
+	/* One envelope may appear only once. Listing a payment twice would pass
+	   every other check, because both copies carry the same seal, the same
+	   chain record and the same valid signature, and the total would count it
+	   twice. The first occurrence stands; the rest are refused. */
+	const seen = new Set();
+
 	const payments = prepared.map((p) => {
 		if (p.error) {
 			return { details: p.item.details, ok: false, checks: {}, reason: p.error };
 		}
+		if (seen.has(p.idHex)) {
+			return {
+				details: p.item.details,
+				idHex: p.idHex,
+				record: null,
+				ok: false,
+				checks: { duplicate: true },
+				reason: 'This payment is listed more than once in the proof.'
+			};
+		}
+		seen.add(p.idHex);
 		const record = records.get(p.idHex) ?? null;
 		const checks = {
 			sealMatches: Boolean(record) && equalBytes(sealBytes(record.seal), p.seal),

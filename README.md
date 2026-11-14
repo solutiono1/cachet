@@ -100,6 +100,32 @@ NOT VERIFIED
 
 ---
 
+## Try the whole thing in a browser
+
+Nothing to source and nothing to ask for.
+
+```bash
+cd web
+npm install
+npm run dev     # http://localhost:5173
+```
+
+1. **Get an account.** The wallet button opens MyNearWallet, which creates a
+   testnet account for free. No extension needed.
+2. **Get test money.** Settings has a faucet. The token on this deployment is
+   `usdc.fakes.testnet`, a testnet fake that lets any account mint, so the
+   button is one transaction you sign yourself: it registers you with the
+   token if needed and mints 500 USDC. Cachet holds no keys and runs no
+   service to make that work. On mainnet there is nothing to mint and the
+   button does not apply.
+3. **Create a pay link**, open it in another browser or a private window, and
+   pay it. That second browser never learns your account.
+4. **Open the envelope** to any account you like.
+5. **Build a proof** from the payment and check it on the verify page, which
+   needs no wallet at all.
+
+---
+
 ## How it works
 
 One invoice becomes one **envelope**.
@@ -211,7 +237,8 @@ contract/        Rust contract (near-sdk 5), no owner, no upgrade path
 web/
   src/lib/core/  the cryptography: crypto.js, envelope.js, proof.js (+ tests)
   src/lib/       chain reading, wallet, vault, config, formatting
-  src/routes/    landing, create, pay, envelopes, prove, verify, settings
+  src/routes/    landing, create, pay, envelopes, prove, verify, settings,
+                 privacy (what leaves the browser, audited from the source)
   bin/cachet.mjs the command-line tool: envelope, sign, proof, verify
 scripts/         the testnet round trip
 docs/            ARCHITECTURE.md
@@ -233,6 +260,18 @@ key.
 | The client paying you | Their own invoice, the contract, one single-use key | Your account, your balance, anyone else who pays you |
 | Anyone reading the chain | That an envelope received an amount from an account | Which envelopes belong to one person, and every invoice detail |
 | Whoever you hand a proof to | Exactly the payments you selected | Any payment you left out |
+
+### What the application sends anywhere
+
+Audited from the source rather than asserted. The whole app contains **one**
+outbound request, in `web/src/lib/near.js`: a view call to a public NEAR RPC
+endpoint carrying an envelope identifier, which is a hash. Everything else is
+your wallet talking to NEAR when you sign.
+
+There are no cookies, no analytics, no error reporting and no advertising
+code. Fonts are served from the app's own origin. The seed and invoice records
+live in your browser's local storage, encrypted with your passphrase using
+PBKDF2 and AES-GCM. `/privacy` lists all of it.
 
 ### Where the privacy stops
 

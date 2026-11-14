@@ -28,9 +28,32 @@ public issue for a vulnerability.
 | Someone pays dust into an envelope to corrupt it | No effect: the envelope id includes the seal, so a wrong seal creates a different envelope, and correct payments add up |
 | Token transfer fails during withdrawal | The callback restores the envelope |
 | An unlisted token is sent | The transfer is refunded in full |
-| Storage spam | A minimum payment makes each stored envelope cost the sender real tokens |
+| Storage spam | Partly mitigated, and weaker than it looks. See below |
 | Administrator abuse | The contract has no owner, no upgrade method, and no pause; configuration is fixed at deployment |
 | Compromised web host serves altered code | The app is static and reproducible from source; the command-line verifier checks proofs without the web app |
+
+## Storage, stated accurately
+
+An earlier version of this file claimed the minimum payment made spam cost the
+sender real tokens. That is not true here, for two reasons:
+
+1. An envelope is never removed, because a proof must still be checkable after
+   the money has been collected. Every envelope therefore consumes contract
+   storage for good, paid out of the contract's own NEAR balance.
+2. The sender does not lose the tokens. They hold the envelope key, so they
+   can open it and take the payment straight back. On this deployment the
+   token is also a testnet fake that anyone can mint, so the tokens cost
+   nothing to begin with.
+
+The result: somebody willing to spend gas can create many envelopes and
+reclaim the money, leaving the contract paying storage for each one until its
+balance will not cover another. On testnet that is cheap to cause and cheap to
+fix, since the contract can simply be redeployed. On mainnet it would need a
+real answer first, and the likely one is to make the payer attach a storage
+deposit the way NEP-141 itself does, refundable when the envelope is opened.
+
+This is recorded here rather than quietly left out because it is the clearest
+remaining weakness in the design.
 
 ## Known limits
 

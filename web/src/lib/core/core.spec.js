@@ -218,6 +218,20 @@ describe('proofs', () => {
 		expect(result.verified).toBe(false);
 	});
 
+	it('refuses a payment listed twice, so a total cannot be inflated', async () => {
+		const { a, chain } = await fixture();
+		const proof = await buildProof([a], statement, CONTRACT);
+		/* Every check passes on both copies: same seal, same record, same
+		   signature. Only the repeat itself is the problem. */
+		proof.items.push({ ...proof.items[0] });
+		const result = await verifyProof(proof, chain, Date.parse('2026-12-01'));
+		expect(result.verified).toBe(false);
+		expect(result.payments[0].ok).toBe(true);
+		expect(result.payments[1].ok).toBe(false);
+		expect(result.payments[1].reason).toMatch(/more than once/);
+		expect(result.total['usdc.testnet']).toBe(250000000n);
+	});
+
 	it('reports expiry', async () => {
 		const { a, chain } = await fixture();
 		const proof = await buildProof([a], statement, CONTRACT);
