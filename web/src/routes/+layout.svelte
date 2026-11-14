@@ -17,12 +17,21 @@
 
 	let path = $derived(page.url.pathname);
 
-	/* Sits on the page background at the top, with no rule beneath it. Once
-	   you scroll it draws in to a floating island, and returns when you come
-	   back up. Two thresholds so it cannot flutter on the boundary. */
+	/* The landing page is the only one that tells a story by scrolling. Every
+	   other screen is a single task that should sit still: no footer beneath
+	   it, no bar that changes shape, and no empty scroll past the end. */
+	let isLanding = $derived(path === '/');
+
+	/* On the landing page the bar sits flush at the top and draws into a
+	   floating island once you scroll, returning when you come back up. Two
+	   thresholds so it cannot flutter on the boundary. */
 	let floating = $state(false);
 
 	$effect(() => {
+		if (!isLanding) {
+			floating = false;
+			return;
+		}
 		const onScroll = () => {
 			const y = window.scrollY;
 			if (!floating && y > 64) floating = true;
@@ -118,10 +127,11 @@
 	</div>
 </header>
 
-<main id="main">
+<main id="main" class:task={!isLanding}>
 	{@render children()}
 </main>
 
+{#if isLanding}
 <footer>
 	<div class="frame">
 		<div class="foot-card">
@@ -182,6 +192,7 @@
 		</div>
 	</div>
 </footer>
+{/if}
 
 <style>
 	.skip {
@@ -335,6 +346,14 @@
 	}
 
 	/* ---- Footer ---- */
+
+	/* A task screen fills the window exactly, so there is nothing to scroll
+	   past when the form is short. */
+	.task {
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100dvh - 64px);
+	}
 
 	footer {
 		margin-top: clamp(56px, 8vw, 104px);

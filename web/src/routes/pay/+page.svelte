@@ -8,6 +8,7 @@
 	import { formatAmount, formatDate, formatTimestamp } from '#lib/format.js';
 	import { payEnvelope, registerWithToken, restore, signIn, wallet } from '#lib/wallet.svelte.js';
 	import Faucet from '#lib/components/Faucet.svelte';
+	import CrossChain from '#lib/components/CrossChain.svelte';
 
 	let invoice = $state(null);
 	let problem = $state('');
@@ -204,6 +205,10 @@
 				</div>
 			{/if}
 		</section>
+
+		{#if !settled}
+			<CrossChain amount={invoice.details.amount} />
+		{/if}
 
 		<section class="panel note">
 			<p class="label">What you are paying into</p>

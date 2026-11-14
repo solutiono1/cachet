@@ -33,3 +33,6 @@ test-results/
 # Contract build output
 /contract/out/
 /contract/target/
+
+# Static build output
+/web/dist/

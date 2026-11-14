@@ -16,7 +16,10 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter(),
+			/* Output to dist rather than build: on Windows another process
+			   keeps a handle on a directory named build, and the adapter
+			   cannot clear it between runs. */
+			adapter: adapter({ pages: 'dist', assets: 'dist' }),
 			// '_app' is reserved by some static hosts, so the build folder is named plainly.
 			appDir: 'build_assets'
 		})
