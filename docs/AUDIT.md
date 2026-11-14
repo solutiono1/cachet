@@ -41,21 +41,62 @@ fake that anyone can mint, so it costs nothing to begin with.
 Corrected in `SECURITY.md`, including what the mainnet answer would be: a
 refundable storage deposit from the payer, the way NEP-141 itself works.
 
-### 3. A dishonest RPC endpoint can forge a verified result. Open, documented
+### 3. A dishonest RPC endpoint could forge a verified result. Fixed
 
-**Severity: medium.** Not fixed, because fixing it properly needs light client
-verification, which is out of scope for this release.
+**Severity: medium.** A reader was trusting one company without being told so.
 
-`verifyProof` reads the envelope through a single RPC endpoint and compares
-what comes back against the locally recomputed seal. If that endpoint lies, and
-returns a fabricated record whose seal, amount and token match a fabricated
-proof, verification will report Verified.
+Verification reads each envelope from the chain and compares it against the
+locally recomputed seal. It used to read through a single RPC endpoint. Nobody
+reads a blockchain directly; they read it through a server somebody runs, and
+that server is free to answer with whatever it likes. An endpoint that returned
+a fabricated record whose seal, amount and token matched a fabricated proof
+made verification report Verified for an invoice that was never paid.
 
-The attacker must control the endpoint the reader uses, so this is a concern
-for someone handed both a proof and an endpoint by the same party. A reader who
-uses an endpoint they chose, or who checks the envelope id on a public
-explorer, is not exposed. The command-line verifier takes `--rpc`, so a careful
-reader can point it wherever they like.
+This is written up as an attack and is reproducible:
+
+```
+node scripts/attacks/rpc-forgery.mjs
+```
+
+It builds a proof for an invoice nobody paid, stands up a local RPC server that
+answers with a record fitting the forgery, and checks the proof twice. Through
+the attacker's endpoint alone it reported Verified and a total of 9,000 USDC.
+
+**The fix.** A verification now reads the chain through several endpoints run by
+different operators and believes a record only when enough of them give the
+same answer. `config.js` lists three independent operators (FastNEAR, the NEAR
+Foundation, and dRPC) and requires two to agree. `viewAgreed` in
+`web/src/lib/near.js` asks them all in parallel, groups identical answers, and
+reports how many stood behind the winning one, which disagreed, and which could
+not be reached.
+
+Three outcomes, all of them shown to the reader rather than hidden:
+
+- **Agreement.** The verifier says "Confirmed by 3 independent chain endpoints",
+  and the command-line tool prints the same line.
+- **Disagreement.** Nothing is confirmed, because one of the operators is wrong
+  or dishonest and there is no way to tell which from inside the app. The
+  reader is told to check the envelope id on a block explorer.
+- **Too few reachable.** Nothing is confirmed, and the reader is told plainly
+  that this is an incomplete read and not a failed proof.
+
+Running the same attack through the attacker plus the independent set now
+reports Not verified, with the reason that the endpoints disagree, and the
+proven total drops to nothing.
+
+`verifyProof` also discards the records themselves whenever the read was not
+trustworthy, rather than relying on the lookup to have withheld them. Without
+that, a payment could be marked verified, and counted in a total, on the
+strength of a record no independent operator stood behind. Two tests that first
+failed on exactly this are now part of the suite.
+
+**What remains true.** A reader who deliberately points the verifier at one
+endpoint, with `--rpc`, is trusting whoever runs it; that is their choice and
+the flag exists so a reader can name operators they trust instead of accepting
+the defaults. Full trustlessness would need light client verification of block
+headers, which is out of scope for this release. Agreement between independent
+operators is not a proof of the chain's state, but it removes the single party
+who could lie and be believed.
 
 ## Checked and found sound
 

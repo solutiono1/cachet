@@ -13,9 +13,16 @@ them. This document describes how the system is built and why.
 | Core library | JavaScript module shared by the app and the command-line verifier | Key derivation, hashing, signing, proof encoding and verification |
 | Command-line verifier | Node script | Verifies a proof file against the chain without the web app |
 
-There is no application server and no database. The web app talks to the NEAR
-RPC directly. Nothing about a user's invoices leaves their browser unless they
+There is no application server and no database. The web app talks to NEAR RPC
+directly. Nothing about a user's invoices leaves their browser unless they
 share a pay link or a proof.
+
+Verification reads the chain through several endpoints run by different
+operators and believes a record only when enough of them agree, because an
+endpoint is a party you would otherwise have to trust. The operators and the
+number that must agree are set in `web/src/lib/config.js`; the agreement logic
+is `viewAgreed` in `web/src/lib/near.js`, and what an agreement report means
+is in `web/src/lib/core/agreement.js`.
 
 ## Vocabulary
 

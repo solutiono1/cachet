@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { agreementNote, agreementProblem } from './agreement.js';
 import { equalBytes, fromB64, randomBytes, toB64, toHex, verify } from './crypto.js';
 import {
 	buildEnvelope,
@@ -26,11 +27,27 @@ const details = {
 };
 
 /** A chain that returns exactly what the contract would store. */
-function chainWith(entries) {
+function chainWith(entries, agreement) {
 	return async (ids) => {
 		const map = new Map();
 		for (const id of ids) if (entries[id]) map.set(id, entries[id]);
+		if (agreement) map.agreement = agreement;
 		return map;
+	};
+}
+
+/** What `fetchEnvelopes` reports after a clean read of three endpoints. */
+function agreeing(extra = {}) {
+	return {
+		asked: 3,
+		answered: 3,
+		quorum: 2,
+		agreed: 3,
+		enough: true,
+		endpoints: ['one', 'two', 'three'],
+		conflicting: [],
+		failures: [],
+		...extra
 	};
 }
 
@@ -257,6 +274,44 @@ describe('proofs', () => {
 		expect(result.payments).toHaveLength(1);
 	});
 
+	it('reports how many independent endpoints confirmed the read', async () => {
+		const { a, b } = await fixture();
+		const entries = { [a.idHex]: await recordFor(a), [b.idHex]: await recordFor(b) };
+		const proof = await buildProof([a, b], statement, CONTRACT);
+		const result = await verifyProof(
+			proof,
+			chainWith(entries, agreeing()),
+			Date.parse('2026-12-01')
+		);
+		expect(result.verified).toBe(true);
+		expect(result.agreement.agreed).toBe(3);
+		expect(agreementNote(result.agreement)).toMatch(/3 independent/);
+	});
+
+	it('refuses to verify when the endpoints disagree', async () => {
+		const { a } = await fixture();
+		const entries = { [a.idHex]: await recordFor(a) };
+		const proof = await buildProof([a], statement, CONTRACT);
+		/* One operator answered something different. Every cryptographic check
+		   on the payment still passes, so only the disagreement can stop it. */
+		const split = agreeing({ agreed: 2, conflicting: ['three'] });
+		const result = await verifyProof(proof, chainWith(entries, split), Date.parse('2026-12-01'));
+		expect(result.verified).toBe(false);
+		expect(result.problems.join(' ')).toMatch(/disagree/);
+		expect(result.total['usdc.testnet']).toBeUndefined();
+	});
+
+	it('refuses to verify when too few endpoints could be reached', async () => {
+		const { a } = await fixture();
+		const entries = { [a.idHex]: await recordFor(a) };
+		const proof = await buildProof([a], statement, CONTRACT);
+		const thin = agreeing({ answered: 1, agreed: 1, enough: false, endpoints: ['one'] });
+		const result = await verifyProof(proof, chainWith(entries, thin), Date.parse('2026-12-01'));
+		expect(result.verified).toBe(false);
+		expect(result.problems.join(' ')).toMatch(/1 of 3 independent endpoints/);
+		expect(result.payments[0].reason).toMatch(/Could not be checked/);
+	});
+
 	it('says so plainly when the chain cannot be read', async () => {
 		const { a } = await fixture();
 		const proof = await buildProof([a], statement, CONTRACT);
@@ -266,5 +321,61 @@ describe('proofs', () => {
 		const result = await verifyProof(proof, broken, Date.parse('2026-12-01'));
 		expect(result.verified).toBe(false);
 		expect(result.problems.join(' ')).toContain('network down');
+	});
+});
+
+describe('endpoint agreement', () => {
+	it('is satisfied by a clean read and by no report at all', () => {
+		expect(agreementProblem(null)).toBe(null);
+		expect(
+			agreementProblem({
+				asked: 3,
+				answered: 3,
+				quorum: 2,
+				agreed: 3,
+				enough: true,
+				conflicting: [],
+				failures: []
+			})
+		).toBe(null);
+	});
+
+	it('distinguishes a disagreement from an incomplete read', () => {
+		const disagreeing = {
+			asked: 3,
+			answered: 3,
+			quorum: 2,
+			agreed: 2,
+			enough: true,
+			conflicting: ['c'],
+			failures: []
+		};
+		expect(agreementProblem(disagreeing)).toMatch(/disagree/);
+		expect(agreementNote(disagreeing)).toBe(null);
+
+		const incomplete = {
+			asked: 3,
+			answered: 1,
+			quorum: 2,
+			agreed: 1,
+			enough: false,
+			conflicting: [],
+			failures: []
+		};
+		expect(agreementProblem(incomplete)).toMatch(/could not be completed/);
+	});
+
+	it('names a single endpoint honestly rather than claiming agreement', () => {
+		expect(
+			agreementNote({
+				asked: 1,
+				answered: 1,
+				quorum: 1,
+				agreed: 1,
+				enough: true,
+				conflicting: [],
+				failures: []
+			})
+		).toBe('Read through 1 chain endpoint.');
 	});
 });

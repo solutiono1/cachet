@@ -197,7 +197,7 @@ The design depends on NEAR specifically, not incidentally.
 | NEP-141 `ft_transfer_call` | How a payment arrives, handled in `ft_on_transfer` |
 | Cross-contract calls and callbacks | Withdrawal marks `opened`, calls the token, and restores state in a `#[private]` callback if the transfer fails |
 | Named accounts | You open an envelope to a readable account, not a hex string |
-| Public RPC | The verifier reads envelopes with no key and no wallet |
+| Public RPC | The verifier reads envelopes with no key and no wallet, through three independent operators that must agree |
 | NEAR Intents | Live cross-chain pricing on the pay screen, from the real 1Click API |
 
 On a chain without on-chain Ed25519 verification, every envelope would need
@@ -216,13 +216,22 @@ NEAR contract  cachetapp.testnet
    envelope id → { seal, token, amount, payer, time, opened }
          │
          ▼
-Anyone holding a proof → reads the contract over public RPC → verified
+Anyone holding a proof → reads the contract through three independent
+                          RPC operators, two of which must agree → verified
 ```
 
 **No backend, no database, no accounts, no cookies, no analytics.** The whole
-application makes one outbound request, a view call to public RPC. That is the
-point rather than a shortcut: a privacy product with a server is asking you to
-trust the server.
+application makes one kind of outbound request, a view call to public RPC. That
+is the point rather than a shortcut: a privacy product with a server is asking
+you to trust the server.
+
+Nobody reads a blockchain directly; they read it through a server somebody
+runs, and that server can answer with whatever it likes. So a verification asks
+three operators (FastNEAR, the NEAR Foundation, and dRPC) and believes a
+payment only when two agree. The verifier says how many confirmed it. If they
+disagree, nothing is confirmed and the reader is told to check the envelope id
+on a block explorer. The attack this defends against is reproducible:
+`node scripts/attacks/rpc-forgery.mjs`.
 
 ## Repository
 
@@ -294,9 +303,12 @@ none.
 
 ### What the application sends anywhere
 
-Audited from the source rather than asserted. One outbound request, in
-`web/src/lib/near.js`: a view call to public RPC carrying an envelope
-identifier, which is a hash. Everything else is your wallet talking to NEAR
+Audited from the source rather than asserted. One kind of outbound request, all
+of it in `web/src/lib/near.js`: a view call to public RPC carrying an envelope
+identifier, which is a hash. A verification sends that same call to three
+endpoints instead of one, so that no single operator has to be trusted; none of
+them learns anything the others do not, because all three receive the same
+hash. Everything else is your wallet talking to NEAR
 when you sign. No cookies, no analytics, no error reporting, no advertising.
 Fonts are served from the app's own origin. The seed and invoice records live
 in local storage, encrypted with your passphrase using PBKDF2 and AES-GCM.

@@ -13,8 +13,8 @@ import { readFileSync } from 'node:fs';
 import { fromHex, randomBytes, toHex } from '../src/lib/core/crypto.js';
 import { buildEnvelope, payLinkPayload, encodePayload, signWithdraw } from '../src/lib/core/envelope.js';
 import { buildProof, verifyProof } from '../src/lib/core/proof.js';
-import { fetchEnvelopes } from '../src/lib/near.js';
-import { CONTRACT_ID, RPC_URL, TOKEN } from '../src/lib/config.js';
+import { agreementNote, fetchEnvelopes } from '../src/lib/near.js';
+import { CONTRACT_ID, QUORUM, RPC_URLS, TOKEN } from '../src/lib/config.js';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -28,8 +28,12 @@ function flag(name, fallback = undefined) {
 function usage(code = 0) {
 	process.stdout.write(`Cachet ${CONTRACT_ID}
 
-  node bin/cachet.mjs verify <proof.json> [--rpc URL]
+  node bin/cachet.mjs verify <proof.json> [--rpc URL[,URL...]] [--quorum N]
       Check a proof against the chain. Exits 0 when verified, 1 when not.
+      By default it asks ${RPC_URLS.length} endpoints run by different operators and
+      believes a payment only when ${QUORUM} of them agree, so no single
+      endpoint can make a forged proof look verified. Pass your own
+      endpoints with --rpc to trust nobody else's choice.
 
   node bin/cachet.mjs envelope --seed <hex> --index <n> --details <file.json>
       Print the claim key, seal and envelope id, plus the pay link payload.
@@ -69,14 +73,23 @@ function seedFrom(flagValue, { allowNew = false } = {}) {
 	return seed;
 }
 
-const rpc = flag('rpc', RPC_URL);
+/* A reader who wants to choose the chain readers themselves can name them,
+   separated by commas. Otherwise the independent set in config.js is used. */
+const rpcs = (flag('rpc') ?? '')
+	.split(',')
+	.map((url) => url.trim())
+	.filter(Boolean);
+const chainOptions = {
+	rpcs: rpcs.length ? rpcs : RPC_URLS,
+	quorum: flag('quorum') ? Number(flag('quorum')) : undefined
+};
 
 switch (command) {
 	case 'verify': {
 		const path = args[1];
 		if (!path || path.startsWith('--')) usage(2);
 		const bundle = JSON.parse(readFileSync(path, 'utf8'));
-		const result = await verifyProof(bundle, (ids) => fetchEnvelopes(ids, { rpc }));
+		const result = await verifyProof(bundle, (ids) => fetchEnvelopes(ids, chainOptions));
 
 		const s = result.statement ?? {};
 		process.stdout.write(`\n${result.verified ? 'VERIFIED' : 'NOT VERIFIED'}\n\n`);
@@ -84,7 +97,10 @@ switch (command) {
 		process.stdout.write(`  for       ${s.audience ?? '—'}\n`);
 		process.stdout.write(`  purpose   ${s.purpose ?? '—'}\n`);
 		process.stdout.write(`  expires   ${s.expires ?? '—'}\n`);
-		process.stdout.write(`  contract  ${result.contract ?? '—'}\n\n`);
+		process.stdout.write(`  contract  ${result.contract ?? '—'}\n`);
+		const note = agreementNote(result.agreement);
+		if (note) process.stdout.write(`  chain     ${note}\n`);
+		process.stdout.write('\n');
 
 		for (const payment of result.payments) {
 			const mark = payment.ok ? 'ok    ' : 'FAILED';

@@ -9,6 +9,7 @@
  * and can be tested without a network.
  */
 
+import { agreed, agreementProblem } from './agreement.js';
 import { equalBytes, fromB64, fromHex, toB64, toHex, verify } from './crypto.js';
 import {
 	VERSION,
@@ -96,6 +97,14 @@ export async function verifyProof(bundle, fetchEnvelopes, now = Date.now()) {
 		chainError = error.message || String(error);
 	}
 
+	/* How the chain was read matters as much as what it said. A reader who
+	   trusts one endpoint trusts whoever runs it, so the lookup reports how
+	   many independent operators agreed. Short of the quorum, or in open
+	   disagreement, nothing is confirmed and the result says why. */
+	const agreement = records?.agreement ?? null;
+	const agreementIssue = chainError || agreed(agreement) ? null : agreementProblem(agreement);
+	const unread = chainError || agreementIssue;
+
 	/* One envelope may appear only once. Listing a payment twice would pass
 	   every other check, because both copies carry the same seal, the same
 	   chain record and the same valid signature, and the total would count it
@@ -117,7 +126,11 @@ export async function verifyProof(bundle, fetchEnvelopes, now = Date.now()) {
 			};
 		}
 		seen.add(p.idHex);
-		const record = records.get(p.idHex) ?? null;
+		/* An untrustworthy read is no read at all. Whatever came back is
+		   discarded here rather than only in the lookup, so that a payment can
+		   never be marked verified, or counted in a total, on the strength of a
+		   record nobody independent stood behind. */
+		const record = unread ? null : records.get(p.idHex) ?? null;
 		const checks = {
 			sealMatches: Boolean(record) && equalBytes(sealBytes(record.seal), p.seal),
 			onChain: Boolean(record),
@@ -137,21 +150,23 @@ export async function verifyProof(bundle, fetchEnvelopes, now = Date.now()) {
 			record,
 			ok,
 			checks,
-			reason: ok ? null : explain(checks, chainError)
+			reason: ok ? null : explain(checks, unread)
 		};
 	});
 
 	const allOk = payments.every((p) => p.ok);
 	if (chainError) problems.push(`The chain could not be read: ${chainError}`);
+	if (agreementIssue) problems.push(agreementIssue);
 	if (expired) problems.push('This proof has expired.');
 
 	return {
-		verified: allOk && !expired && !chainError,
+		verified: allOk && !expired && !unread,
 		expired,
 		statement: bundle.statement,
 		contract: bundle.contract,
 		payments,
 		problems,
+		agreement,
 		total: totalBy(payments)
 	};
 
@@ -163,6 +178,7 @@ export async function verifyProof(bundle, fetchEnvelopes, now = Date.now()) {
 			contract: bundle?.contract ?? null,
 			payments: [],
 			problems: [reason],
+			agreement: null,
 			total: {}
 		};
 	}
@@ -177,8 +193,8 @@ function sealBytes(value) {
 	}
 }
 
-function explain(checks, chainError) {
-	if (chainError) return 'Could not be checked against the chain.';
+function explain(checks, unread) {
+	if (unread) return 'Could not be checked against the chain.';
 	if (!checks.onChain) return 'No payment with this seal exists in the contract.';
 	if (!checks.sealMatches) return 'The invoice details do not match the seal recorded on chain.';
 	if (!checks.amountMatches) return 'The amount does not match the payment recorded on chain.';

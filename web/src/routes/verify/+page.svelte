@@ -3,8 +3,8 @@
 	import Seal from '#lib/components/Seal.svelte';
 	import { decodePayload } from '#lib/core/envelope.js';
 	import { verifyProof } from '#lib/core/proof.js';
-	import { fetchEnvelopes } from '#lib/near.js';
-	import { CONTRACT_ID, TOKEN, explorerAccount } from '#lib/config.js';
+	import { agreementNote, fetchEnvelopes } from '#lib/near.js';
+	import { CONTRACT_ID, QUORUM, RPC_URLS, TOKEN, explorerAccount } from '#lib/config.js';
 	import { formatAmount, formatDate, formatTimestamp } from '#lib/format.js';
 
 	let result = $state(null);
@@ -59,6 +59,7 @@
 	}
 
 	const totals = $derived(Object.entries(result?.total ?? {}));
+	const chainNote = $derived(agreementNote(result?.agreement));
 </script>
 
 <svelte:head>
@@ -73,7 +74,10 @@
 	{#if checking}
 		<header class="head">
 			<h1>Checking against the chain…</h1>
-			<p class="lede">Reading {CONTRACT_ID} on NEAR testnet.</p>
+			<p class="lede">
+				Reading {CONTRACT_ID} on NEAR testnet through {RPC_URLS.length} independent
+				endpoints.
+			</p>
 		</header>
 	{:else if result}
 		<header class="verdict" class:good={result.verified}>
@@ -114,6 +118,9 @@
 							</a>
 						</dd>
 					</div>
+					{#if chainNote}
+						<div><dt>Read through</dt><dd>{chainNote}</dd></div>
+					{/if}
 				</dl>
 			</section>
 		{/if}
@@ -218,10 +225,15 @@
 					Each payment's signature is checked against the key that owns it, over the
 					statement naming you.
 				</li>
+				<li>
+					The chain is read through {RPC_URLS.length} endpoints run by different operators,
+					and a payment counts as confirmed only when {QUORUM} of them agree.
+				</li>
 			</ol>
 			<p class="caption">
 				The third check is why a client who paid one of these invoices cannot present it
-				as their own income.
+				as their own income. The fourth is why no one endpoint can tell you a payment
+				happened when it did not.
 			</p>
 		</section>
 	{/if}
