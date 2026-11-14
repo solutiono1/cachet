@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import Lock from '#lib/components/Lock.svelte';
-	import Copy from '#lib/components/Copy.svelte';
+	import ShareLink from '#lib/components/ShareLink.svelte';
 	import Seal from '#lib/components/Seal.svelte';
 	import { allEnvelopes, load, vault } from '#lib/vault.svelte.js';
 	import { fetchEnvelopes } from '#lib/near.js';
@@ -128,7 +128,12 @@
 
 		<section class="card result">
 			<p class="label">Link to send</p>
-			<Copy value={link} label="Copy link" />
+			<ShareLink
+				value={link}
+				carries="proof"
+				shareTitle="Proof of income from Cachet"
+				shareText={`Proof for ${made.proof.statement.audience}`}
+			/>
 			<div class="row">
 				<button class="btn btn--secondary" type="button" onclick={download}>
 					Download the file instead

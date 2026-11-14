@@ -20,6 +20,46 @@ export default defineConfig({
 			   keeps a handle on a directory named build, and the adapter
 			   cannot clear it between runs. */
 			adapter: adapter({ pages: 'dist', assets: 'dist' }),
+
+			/* Cachet's claim is that nothing about an invoice leaves the
+			   browser. A policy makes the browser enforce that instead of
+			   asking anyone to take it on trust, and the connect list below
+			   is the complete set of hosts this application can reach.
+			   Anything else, including a script injected into a page, is
+			   refused by the browser before it can send a byte.
+			   'hash' mode lets SvelteKit hash its own inline bootstrap. */
+			csp: {
+				mode: 'hash',
+				directives: {
+					'default-src': ['none'],
+					'script-src': ['self'],
+					/* Svelte writes custom properties as style attributes. */
+					'style-src': ['self', 'unsafe-inline'],
+					'img-src': ['self', 'data:'],
+					'font-src': ['self'],
+					'manifest-src': ['self'],
+					'connect-src': [
+						'self',
+						/* The three independent chain readers a verification
+						   must agree on, listed in src/lib/config.js. */
+						'https://rpc.testnet.fastnear.com',
+						'https://rpc.testnet.near.org',
+						'https://near-testnet.drpc.org',
+						/* What the wallet selector reaches on its own. */
+						'https://test.rpc.fastnear.com',
+						'https://test.api.fastnear.com',
+						'https://helper.testnet.near.org',
+						'https://testnet.mynearwallet.com',
+						/* Live cross-chain quotes on the pay screen. */
+						'https://1click.chaindefuser.com'
+					],
+					'base-uri': ['self'],
+					'form-action': ['self'],
+					'frame-src': ['none'],
+					'object-src': ['none'],
+					'frame-ancestors': ['none']
+				}
+			},
 			// '_app' is reserved by some static hosts, so the build folder is named plainly.
 			appDir: 'build_assets'
 		})

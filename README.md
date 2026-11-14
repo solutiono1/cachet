@@ -263,7 +263,7 @@ testnet transactions, the [`near` CLI](https://github.com/near/near-cli-rs).
 cd web
 npm install
 npm run dev      # http://localhost:5173
-npm test         # 50 tests on keys, seals, links, proofs and palette contrast
+npm test         # 64 tests on keys, seals, links, proofs, endpoint agreement and contrast
 npm run build    # static site in web/dist
 
 cd ../contract
@@ -339,8 +339,10 @@ not use it with funds you cannot afford to lose.
 - [near-sdk](https://github.com/near/near-sdk-rs) 5.30 for the contract
 - [SvelteKit](https://svelte.dev/docs/kit) 3 with `adapter-static`, plain
   JavaScript, no TypeScript
-- [@noble/curves](https://github.com/paulmillr/noble-curves) for Ed25519 and
-  [@scure/base](https://github.com/paulmillr/scure-base) for encodings
+- [@noble/curves](https://github.com/paulmillr/noble-curves) for Ed25519,
+  [@scure/base](https://github.com/paulmillr/scure-base) for encodings, and
+  [@paulmillr/qr](https://github.com/paulmillr/qr) to draw a pay link as a QR
+  code in the browser, all three zero-dependency
 - [@near-wallet-selector](https://github.com/near/wallet-selector) with
   MyNearWallet, so a payer needs no browser extension
 - Hashing, HKDF, PBKDF2 and AES-GCM come from the platform's own Web Crypto

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import Lock from '#lib/components/Lock.svelte';
-	import Copy from '#lib/components/Copy.svelte';
+	import ShareLink from '#lib/components/ShareLink.svelte';
 	import Seal from '#lib/components/Seal.svelte';
 	import { addInvoice, load, vault } from '#lib/vault.svelte.js';
 	import { encodePayload, payLinkPayload } from '#lib/core/envelope.js';
@@ -94,7 +94,12 @@
 				<p class="label">Pay link</p>
 				<span class="badge">Awaiting payment</span>
 			</div>
-			<Copy value={link} label="Copy link" />
+			<ShareLink
+				value={link}
+				carries="invoice"
+				shareTitle="Invoice from Cachet"
+				shareText={`Invoice for ${made.envelope.details.client}`}
+			/>
 
 			<dl class="facts">
 				<div><dt>Amount</dt><dd class="mono">{formatAmount(made.envelope.details.amount)} {TOKEN.symbol}</dd></div>
@@ -107,7 +112,7 @@
 			<p class="caption">
 				The seal is all the chain ever holds. The invoice itself lives in the link, in
 				the part after the <code class="mono">#</code>, which browsers never send to any
-				server.
+				server. That is why the link is long and why Cachet needs no database.
 			</p>
 		</section>
 

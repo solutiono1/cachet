@@ -1,0 +1,29 @@
+# Response headers for Cloudflare Pages.
+#
+# Cachet keeps every secret in the browser, so the browser's own defences are
+# the ones that matter. These are the headers a static host can set; the
+# content security policy itself is built by SvelteKit, which knows the hashes
+# of its own inline scripts, and travels in the page.
+#
+# frame-ancestors cannot be set from a meta tag, which is why clickjacking is
+# handled here rather than in the policy.
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Permissions-Policy: accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), display-capture=(), document-domain=(), encrypted-media=(), geolocation=(), gyroscope=(), idle-detection=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=()
+
+# Fingerprinted assets never change under the same name.
+/build_assets/immutable/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# A pay link or a proof link carries its payload in the fragment, which never
+# reaches this host. The pages themselves must not be cached stale, because a
+# verification result has to come from today's chain.
+/pay/*
+  Cache-Control: no-store
+/verify/*
+  Cache-Control: no-store

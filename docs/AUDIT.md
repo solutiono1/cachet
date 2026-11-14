@@ -139,6 +139,22 @@ a pasted file, render as text through Svelte's default escaping.
 a testnet fake whose mint is open to everyone by design. The person signs the
 transaction themselves; Cachet holds no key and fronts nothing.
 
+## Third-party code added after this review began
+
+`@paulmillr/qr` 0.3.0, to draw a pay link as a QR code. It has no dependencies
+of its own, is dual licensed MIT or Apache-2.0, and comes from the author of
+`@noble/curves` and `@scure/base`, which Cachet already relies on for its
+signing and encoding.
+
+It was chosen over a hosted QR service for a reason that matters here: a pay
+link contains the invoice. Sending it to a service that renders codes would
+hand the invoice to that service and break the central claim of the product.
+The encoding happens in the browser, offline.
+
+The code is only handed a string Cachet itself composed, and the matrix it
+returns is drawn as one SVG path built from numbers. Nothing it produces is
+inserted as markup, so the "no `{@html}`" property above still holds.
+
 ## What this review is not
 
 It is not an independent audit, it did not include fuzzing or formal analysis
