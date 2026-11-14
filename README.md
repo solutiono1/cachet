@@ -12,6 +12,7 @@ against the chain with no wallet and no account.
 [Live contract](https://testnet.nearblocks.io/address/cachetapp.testnet) ·
 [Architecture](docs/ARCHITECTURE.md) ·
 [Security review](docs/AUDIT.md) ·
+[Deploying](docs/DEPLOY.md) ·
 [Threat model](SECURITY.md)
 
 Built for the NEAR Hackathon, November 2026
@@ -243,8 +244,8 @@ web/
   src/lib/       chain reads, wallet, faucet, vault, NEAR Intents, formatting
   src/routes/    landing, create, pay, envelopes, prove, verify, settings, privacy
   bin/cachet.mjs command line: envelope, sign, proof, verify
-scripts/         the testnet round trip
-docs/            ARCHITECTURE.md, AUDIT.md
+scripts/         the testnet round trip, and attacks/ for the RPC forgery attempt
+docs/            ARCHITECTURE.md, AUDIT.md, DEPLOY.md
 examples/        a sample invoice list for the quick start
 ```
 
