@@ -27,15 +27,26 @@
 	   thresholds so it cannot flutter on the boundary. */
 	let floating = $state(false);
 
+	/* A task screen keeps a plain full width bar, but the bar is sticky, so
+	   anything tall enough to scroll passes underneath it. With a transparent
+	   background the two sets of text sit on top of each other and neither can
+	   be read. The bar takes a glass backing the moment the page leaves the
+	   top, which hides what is passing under it without turning into the
+	   landing page's island. */
+	let lifted = $state(false);
+
 	$effect(() => {
-		if (!isLanding) {
-			floating = false;
-			return;
-		}
 		const onScroll = () => {
 			const y = window.scrollY;
-			if (!floating && y > 64) floating = true;
-			else if (floating && y < 28) floating = false;
+			if (isLanding) {
+				lifted = false;
+				if (!floating && y > 64) floating = true;
+				else if (floating && y < 28) floating = false;
+				return;
+			}
+			floating = false;
+			if (!lifted && y > 8) lifted = true;
+			else if (lifted && y < 4) lifted = false;
 		};
 		onScroll();
 		window.addEventListener('scroll', onScroll, { passive: true });
@@ -94,7 +105,7 @@
 
 <a class="skip" href="#main">Skip to content</a>
 
-<header class:floating>
+<header class:floating class:lifted>
 	<div class="shell">
 		<a class="wordmark" href="/">
 			<Mark size={26} title="Cachet" />
@@ -250,6 +261,30 @@
 	@media (min-width: 640px) {
 		.shell {
 			padding-inline: 28px;
+		}
+	}
+
+	/* The task screen bar: glass across the full width, keeping its square
+	   edges. It hides what scrolls under it without becoming an island.
+
+	   The backing is heavier than the landing island's on purpose. Blur is a
+	   luxury, not a guarantee: a browser without backdrop-filter falls back to
+	   this colour alone, and at the island's 86 per cent the text passing
+	   underneath still ghosts through, which is the very fault this rule
+	   exists to cure. At 95 it reads as glass and hides what is behind it
+	   whether or not the blur lands. */
+	.lifted .shell {
+		border-color: var(--glass-line);
+		background: color-mix(in srgb, var(--surface) 95%, transparent);
+		backdrop-filter: blur(14px) saturate(1.1);
+		-webkit-backdrop-filter: blur(14px) saturate(1.1);
+	}
+
+	/* No blur available means the colour is doing all the work, so it stops
+	   pretending to be translucent. */
+	@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+		.lifted .shell {
+			background: var(--surface);
 		}
 	}
 
