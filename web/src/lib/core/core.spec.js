@@ -18,7 +18,7 @@ const CONTRACT = 'cachet.testnet';
 
 const details = {
 	v: 1,
-	payee: 'Solution Nau',
+	payee: 'solutiono1',
 	client: 'Northwind Studio',
 	description: 'Brand identity, phase one',
 	amount: '250000000',
@@ -187,7 +187,7 @@ describe('withdrawal signatures', () => {
 describe('proofs', () => {
 	const statement = {
 		v: 1,
-		payee: 'Solution Nau',
+		payee: 'solutiono1',
 		audience: 'Harbour Lettings',
 		purpose: 'Rental application',
 		expires: '2027-01-31'

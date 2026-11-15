@@ -28,7 +28,7 @@ const CONTRACT = 'cachetapp.testnet';
 /* An invoice that was never paid. Nobody ever sent these tokens. */
 const details = {
   v: 1,
-  payee: 'Solution Nau',
+  payee: 'solutiono1',
   client: 'Ghost Client Ltd',
   description: 'Work that was never paid for',
   amount: '9000000000',

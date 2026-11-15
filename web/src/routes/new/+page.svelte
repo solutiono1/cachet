@@ -138,7 +138,7 @@
 					bind:value={payee}
 					required
 					maxlength="80"
-					placeholder="Solution Nau"
+					placeholder="solutiono1"
 					name="cachet-payee"
 					autocomplete="off"
 					data-1p-ignore
