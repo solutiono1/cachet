@@ -17,8 +17,46 @@ export { agreed, agreementNote, agreementProblem } from './core/agreement.js';
 
 let nextId = 1;
 
-/** Call a view method on one endpoint and return its decoded JSON result. */
-export async function view(method, args = {}, { rpc = RPC_URL, contract = CONTRACT_ID } = {}) {
+/**
+ * Call a view method on one endpoint and return its decoded JSON result.
+ *
+ * Requiring endpoints to agree means a verification now fails closed when the
+ * network is merely slow, and "could not be read" looks alarming to someone
+ * who only wanted to check a proof. So each endpoint gets a deadline and one
+ * second attempt before it counts as unreachable. This is not a retry loop
+ * for a chain that disagrees with itself: a wrong answer is returned, not
+ * thrown, and no number of attempts will change it.
+ */
+export async function view(
+	method,
+	args = {},
+	{ rpc = RPC_URL, contract = CONTRACT_ID, timeoutMs = 8000, attempts = 2 } = {}
+) {
+	let lastError;
+	for (let attempt = 1; attempt <= attempts; attempt++) {
+		try {
+			return await askOnce(method, args, { rpc, contract, timeoutMs });
+		} catch (error) {
+			lastError = error;
+			/* An endpoint that ran out of time has already had its full
+			   deadline. Asking again only makes the person wait twice as
+			   long for the same answer, so only quick failures are retried. */
+			if (timedOut(error) || attempt === attempts) break;
+			await pause(250);
+		}
+	}
+	throw lastError;
+}
+
+function timedOut(error) {
+	return error?.name === 'TimeoutError' || error?.name === 'AbortError';
+}
+
+function pause(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function askOnce(method, args, { rpc, contract, timeoutMs }) {
 	const body = {
 		jsonrpc: '2.0',
 		id: nextId++,
@@ -32,10 +70,12 @@ export async function view(method, args = {}, { rpc = RPC_URL, contract = CONTRA
 		}
 	};
 
+	/* A hanging endpoint must not hold up the two that answered. */
 	const response = await fetch(rpc, {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify(body)
+		body: JSON.stringify(body),
+		signal: AbortSignal.timeout(timeoutMs)
 	});
 
 	if (!response.ok) {

@@ -1,0 +1,28 @@
+{
+  "v": 1,
+  "t": "proof",
+  "contract": "cachetapp.testnet",
+  "statement": {
+    "v": 1,
+    "payee": "Demo Earner",
+    "audience": "Harbour Lettings",
+    "purpose": "Rental application",
+    "expires": "2027-02-28"
+  },
+  "items": [
+    {
+      "claim": "O5BFKqEoSADPR9DVhaAVgjYQ8t16Adx_5bGaVaPv-r8",
+      "salt": "xt314G6vXUpFuuINM_94H69RPo5SvQI61fXNPkNxW4Y",
+      "details": {
+        "v": 1,
+        "payee": "Demo Earner",
+        "client": "Northwind Studio",
+        "description": "Brand identity, phase one",
+        "amount": "250000000",
+        "token": "usdc.fakes.testnet",
+        "issued": "2026-11-13"
+      },
+      "sig": "hIF5ZIzzlrvXjEqMSAsJ-b47Cn83XLGWvu1-5XtKcdKJrqghruf3cc38MAkIIoovBhbmrXeNW8O57MgkqOCeAw"
+    }
+  ]
+}
